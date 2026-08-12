@@ -1,0 +1,32 @@
+.game-shell { position: relative; height: 100vh; min-height: 620px; overflow: hidden; background: #030504; user-select: none; }
+.office { position: absolute; inset: 0; overflow: hidden; cursor: crosshair; background: linear-gradient(#090d0b 0 15%, #111713 15% 72%, #090b0a 72%); }
+.office::before { content: ''; position: absolute; inset: 15% 0 25%; opacity: .18; background: repeating-linear-gradient(90deg, transparent 0 90px, #758076 91px 93px), repeating-linear-gradient(0deg, transparent 0 74px, #758076 75px 77px); }
+.ceiling { position: absolute; top: 0; width: 100%; height: 16%; background: repeating-linear-gradient(90deg, #070a08 0 140px, #111612 142px 145px); border-bottom: 5px solid #272d28; }
+.ceiling i { position: absolute; top: 45%; width: 12%; height: 9px; background: #c8c7ae; filter: blur(2px); opacity: .45; box-shadow: 0 15px 45px #c8c7ae; }
+.ceiling i:nth-child(1) { left: 14%; }.ceiling i:nth-child(2) { left: 44%; }.ceiling i:nth-child(3) { right: 14%; }
+.office-door { position: absolute; top: 16%; bottom: 24%; width: 22%; border: 12px solid #171d19; background: #020303; overflow: hidden; }
+.office-door--left { left: 0; border-left: 0; }.office-door--right { right: 0; border-right: 0; }
+.door-slab { position: absolute; inset: 0; transform: translateY(-101%); transition: transform .5s cubic-bezier(.4,0,.2,1); background: repeating-linear-gradient(0deg, #2e3531 0 38px, #151a17 40px 45px); border-bottom: 12px solid #050706; box-shadow: inset 0 0 30px #000; }
+.office-door--closed .door-slab { transform: translateY(0); }.office-door--moving .door-slab { filter: brightness(1.25); }
+.door-slab i { display: block; height: 3px; margin-top: 20%; background: #525d56; }
+.door-control { position: absolute; top: 45%; width: 27px; padding: 5px; z-index: 3; background: #252b27; border: 2px solid #59615b; }
+.door-control--left { left: 22%; }.door-control--right { right: 22%; }
+.door-control i { display: block; width: 13px; height: 13px; margin: 4px 0; border-radius: 50%; background: #7a2424; }.door-control i + i { background: #627c4b; }
+.window-frame { position: absolute; left: 31%; top: 20%; width: 38%; height: 42%; padding: 14px; background: #151a17; border: 3px solid #303833; box-shadow: 0 0 0 8px #090c0a; }
+.window-glass { position: relative; height: 100%; overflow: hidden; background: linear-gradient(160deg, #111a19, #020404); border: 2px solid #35423e; }
+.window-glass::before, .window-glass::after { content: ''; position: absolute; background: #29322e; z-index: 2; }.window-glass::before { left: 49%; width: 3%; height: 100%; }.window-glass::after { top: 49%; width: 100%; height: 3%; }
+.rain { position: absolute; inset: -50%; transform: rotate(18deg); background: repeating-linear-gradient(90deg, transparent 0 30px, #70877f 31px, transparent 32px 55px); opacity: .2; animation: rain .9s linear infinite; }.rain--two { animation-duration: 1.4s; left: -20%; }
+@keyframes rain { to { transform: rotate(18deg) translateY(80px); } }
+.window-creature { position: absolute; inset: 25% 22% 0; opacity: .1; text-align: center; background: radial-gradient(ellipse, #38342c, #060706 65%); border-radius: 50% 50% 15% 15%; transition: .15s; }
+.window-creature.visible { opacity: .9; }.window-creature span { display: inline-block; margin: 35% 8px 0; color: #e8e1a7; text-shadow: 0 0 12px #fff; }.window-creature b { display: block; margin-top: 12px; font-size: 10px; letter-spacing: .2em; color: #9f9b83; }
+.left-threat { position: absolute; left: 2%; top: 54%; z-index: 4; width: 9%; height: 13%; opacity: .32; background: #364138; border-radius: 0 80% 25% 0; }.left-threat.revealed { width: 18%; height: 43%; top: 25%; opacity: 1; background: radial-gradient(circle at 70% 35%, #adbd69 0 4%, transparent 5%), #31422c; }.left-threat b { display: none; }.left-threat.revealed b { display: block; padding: 20px; color: #a9b38b; font-size: 10px; }
+.right-eyes { position: absolute; right: 7%; top: 48%; z-index: 4; }.right-eyes i { display: inline-block; width: 8px; height: 8px; margin: 10px; border-radius: 50%; background: #f4e59a; box-shadow: 0 0 14px #fff4a8; }
+.fox-shadow { position: absolute; right: 23%; top: 44%; z-index: 4; color: #d6b29b; font-weight: 900; letter-spacing: .2em; animation: shake .08s infinite; }
+@keyframes shake { 50% { transform: translateX(5px); } }
+.fuse-box { position: absolute; left: 24%; top: 29%; width: 52px; height: 75px; background: #3b423e; color: #d6ad55; border: 3px solid #656e68; z-index: 4; }.fuse-box span, .fuse-box small { display: block; }.fuse-box small { font-size: 8px; }
+.chick { display: none; position: absolute; left: 20%; bottom: 25%; z-index: 7; width: 48px; height: 54px; border: 0; border-radius: 50% 50% 35% 35%; background: #b79a32; opacity: 0; }.chick--present { display: block; }.chick--lit { opacity: 1; }.chick i { color: #121510; margin: 3px; }.chick b { display: block; color: #e98529; }
+.desk { position: absolute; left: 25%; right: 25%; bottom: 0; height: 27%; background: linear-gradient(#302d28 0 8%, #171714 9%); clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%); z-index: 5; }
+.desk-monitor { position: absolute; left: 32%; top: -62%; width: 36%; height: 72%; border: 12px solid #171a18; background: #020302; color: #77ce96; box-shadow: 0 8px 0 #080a09; }.desk-monitor--on { background: #14231a; box-shadow: inset 0 0 22px #3b7d51, 0 8px 0 #080a09; }.desk-monitor span { font: 11px monospace; letter-spacing: .12em; }
+.keyboard { position: absolute; left: 35%; top: 20%; width: 30%; height: 27%; background: repeating-linear-gradient(90deg, #454943 0 8px, #151815 9px 11px); transform: perspective(80px) rotateX(35deg); }
+.drawer { position: absolute; right: 5%; top: 24%; width: 22%; height: 40%; color: #858a85; background: #23231f; border: 2px solid #3a3b35; }.drawer--open { transform: translateY(25px); background: #090a09; }.drawer span { font-size: 8px; letter-spacing: .15em; }.drawer i { display: block; margin-top: 12px; font-style: normal; }
+.flashlight-beam { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(circle 150px at var(--light-x) var(--light-y), rgba(255,246,195,.35), rgba(255,246,195,.08) 45%, transparent 72%); mix-blend-mode: screen; }
