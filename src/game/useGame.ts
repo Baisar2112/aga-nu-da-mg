@@ -2,10 +2,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createInitialState } from './constants';
 import { stepGame } from './stepGame';
 import type { DoorSide, GameState } from './types';
+import { clearGameSave, loadCheckpoint, markCompleted, PHASE_LENGTH, saveCheckpoint } from '../lib/gameSave';
 
 export function useGame() {
-  const [state, setState] = useState(createInitialState);
+  const [state, setState] = useState(() => loadCheckpoint() ?? createInitialState());
   const lastTick = useRef(performance.now());
+  const savedPhase = useRef(Math.floor(state.elapsed / PHASE_LENGTH));
+
+  useEffect(() => {
+    if (!loadCheckpoint() && !state.won) saveCheckpoint(state);
+  }, []);
+
+  useEffect(() => {
+    const phase = Math.min(2, Math.floor(state.elapsed / PHASE_LENGTH));
+    if (phase > savedPhase.current && !state.gameOver && !state.won) {
+      savedPhase.current = phase;
+      saveCheckpoint(state);
+    }
+    if (state.won) markCompleted();
+  }, [state]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -37,10 +52,10 @@ export function useGame() {
     }), 500);
   }, []);
 
-  const toggleComputer = useCallback(() => setState((current) => {
+  const toggleTablet = useCallback(() => setState((current) => {
     if (current.energy <= 0 || current.problems.outageActive) return current;
     const next = structuredClone(current);
-    if (next.computer === 'OFF') next.computer = 'ON';
+    if (next.computer === 'OFF') next.computer = 'CAMERA_VIEW';
     else {
       next.computer = 'OFF';
       next.rebootTime = 0;
@@ -53,19 +68,23 @@ export function useGame() {
     return { ...current, flashlightOn: on, flashlightPulse: on ? current.flashlightPulse + 1 : current.flashlightPulse };
   }), []);
 
-  const enterComputer = useCallback(() => setState((current) =>
-    current.computer === 'ON' ? { ...current, computer: 'WORKING' } : current), []);
-
   const action = useCallback((change: (next: GameState) => void) => setState((current) => {
     const next = structuredClone(current);
     change(next);
     return next;
   }), []);
 
-  const restart = useCallback(() => {
+  const restart = useCallback(() => setState((current) => {
     lastTick.current = performance.now();
-    setState(createInitialState());
-  }, []);
+    if (current.won) {
+      clearGameSave();
+      savedPhase.current = 0;
+      const initial = createInitialState();
+      saveCheckpoint(initial);
+      return initial;
+    }
+    return loadCheckpoint() ?? createInitialState();
+  }), []);
 
-  return { state, setState, toggleDoor, toggleComputer, setFlashlight, enterComputer, action, restart };
+  return { state, setState, toggleDoor, toggleTablet, setFlashlight, action, restart };
 }

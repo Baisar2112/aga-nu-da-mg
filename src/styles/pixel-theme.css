@@ -1,0 +1,61 @@
+/* Общий пиксельный слой для офиса и всех игровых окон. */
+.game-shell,
+.game-shell button,
+.game-shell kbd,
+.game-shell input {
+  font-family: 'Press Start 2P', monospace;
+  image-rendering: pixelated;
+}
+
+.game-shell::after {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  content: '';
+  pointer-events: none;
+  opacity: .1;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, #000 3px 5px),
+    repeating-linear-gradient(90deg, transparent 0 3px, #000 3px 5px);
+}
+
+.office,
+.camera-feed,
+.end-screen {
+  image-rendering: pixelated;
+  filter: contrast(1.12) saturate(.55);
+}
+
+.door-slab,
+.window-creature,
+.chick,
+.drawer,
+.game-message,
+.monitor-ui,
+.repair-panel,
+.controls-hint kbd,
+.end-screen button {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.door-slab { transition: transform .5s steps(6); }
+.window-creature { transition: opacity .15s steps(2); }
+.computer-overlay,
+.panel-backdrop { backdrop-filter: none; }
+.ceiling i { filter: none; box-shadow: none; }
+.right-eyes i { border-radius: 0; box-shadow: 0 0 0 4px #343424; }
+.window-creature span { text-shadow: 4px 4px #333; }
+.flashlight-beam { mix-blend-mode: normal; opacity: .72; }
+
+.hud-time strong { font-family: inherit; font-size: 26px; }
+.hud-time span,
+.meter,
+.meter b,
+.controls-hint,
+.game-message { line-height: 1.55; }
+.spinner { border-radius: 0; animation: pixel-spin .8s steps(4) infinite; }
+
+@keyframes pixel-spin {
+  to { transform: rotate(360deg); }
+}

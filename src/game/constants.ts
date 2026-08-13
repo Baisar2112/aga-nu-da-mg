@@ -36,6 +36,7 @@ export function createInitialState(): GameState {
     elapsed: 0,
     energy: 100,
     flashlightBattery: 100,
+    hasFlashlight: false,
     flashlightOn: false,
     flashlightAtWindow: true,
     flashlightPulse: 0,

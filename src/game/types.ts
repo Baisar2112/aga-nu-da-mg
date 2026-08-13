@@ -34,6 +34,7 @@ export interface GameState {
   elapsed: number;
   energy: number;
   flashlightBattery: number;
+  hasFlashlight: boolean;
   flashlightOn: boolean;
   flashlightAtWindow: boolean;
   flashlightPulse: number;
