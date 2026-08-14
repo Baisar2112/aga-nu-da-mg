@@ -3,10 +3,14 @@ import { createInitialState } from './constants';
 import { stepGame } from './stepGame';
 import type { DoorSide, GameState } from './types';
 import { clearGameSave, loadCheckpoint, markCompleted, PHASE_LENGTH, saveCheckpoint } from '../lib/gameSave';
+import { loadDeveloperConfig } from '../lib/developerConfig';
 
-export function useGame() {
-  const [state, setState] = useState(() => loadCheckpoint() ?? createInitialState());
+const createConfiguredState = () => createInitialState(loadDeveloperConfig() ?? undefined);
+
+export function useGame(isPaused = false) {
+  const [state, setState] = useState(() => loadCheckpoint() ?? createConfiguredState());
   const lastTick = useRef(performance.now());
+  const paused = useRef(isPaused);
   const savedPhase = useRef(Math.floor(state.elapsed / PHASE_LENGTH));
 
   useEffect(() => {
@@ -23,8 +27,17 @@ export function useGame() {
   }, [state]);
 
   useEffect(() => {
+    paused.current = isPaused;
+    lastTick.current = performance.now();
+  }, [isPaused]);
+
+  useEffect(() => {
     const timer = window.setInterval(() => {
       const now = performance.now();
+      if (paused.current) {
+        lastTick.current = now;
+        return;
+      }
       const dt = Math.min(0.25, (now - lastTick.current) / 1000);
       lastTick.current = now;
       setState((current) => stepGame(current, dt));
@@ -42,14 +55,26 @@ export function useGame() {
       (side === 'left' ? next.leftDoor : next.rightDoor).moving = true;
       return next;
     });
-    window.setTimeout(() => setState((current) => {
-      const next = structuredClone(current);
-      const door = side === 'left' ? next.leftDoor : next.rightDoor;
-      if (!door.moving) return current;
-      door.closed = !door.closed;
-      door.moving = false;
-      return next;
-    }), 500);
+    let remaining = 500;
+    let previousTick = performance.now();
+    const finishMovement = () => {
+      const now = performance.now();
+      if (!paused.current) remaining -= now - previousTick;
+      previousTick = now;
+      if (remaining > 0) {
+        window.setTimeout(finishMovement, Math.min(50, remaining));
+        return;
+      }
+      setState((current) => {
+        const next = structuredClone(current);
+        const door = side === 'left' ? next.leftDoor : next.rightDoor;
+        if (!door.moving) return current;
+        door.closed = !door.closed;
+        door.moving = false;
+        return next;
+      });
+    };
+    window.setTimeout(finishMovement, 50);
   }, []);
 
   const toggleTablet = useCallback(() => setState((current) => {
@@ -79,11 +104,11 @@ export function useGame() {
     if (current.won) {
       clearGameSave();
       savedPhase.current = 0;
-      const initial = createInitialState();
+      const initial = createConfiguredState();
       saveCheckpoint(initial);
       return initial;
     }
-    return loadCheckpoint() ?? createInitialState();
+    return loadCheckpoint() ?? createConfiguredState();
   }), []);
 
   return { state, setState, toggleDoor, toggleTablet, setFlashlight, action, restart };

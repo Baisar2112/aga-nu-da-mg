@@ -39,7 +39,7 @@
   box-shadow: none;
 }
 
-.door-slab { transition: transform .5s steps(6); }
+.door-slab { transition: transform .2s steps(4); }
 .window-creature { transition: opacity .15s steps(2); }
 .computer-overlay,
 .panel-backdrop { backdrop-filter: none; }

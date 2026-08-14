@@ -5,8 +5,11 @@ interface Props {
 
 export function CameraMap({ selected, selectCamera }: Props) {
   return <nav className="camera-floorplan" aria-label="Карта камер пиццерии">
-    <h3>КАМЕРЫ</h3>
     <div className="floorplan-rooms">
+      <i className="floor-corridor floor-corridor--a" />
+      <i className="floor-corridor floor-corridor--b" />
+      <i className="floor-corridor floor-corridor--c" />
+      <i className="floor-corridor floor-corridor--d" />
       {Array.from({ length: 9 }, (_, index) => index + 1).map((camera) =>
         <button key={camera} className={`floor-room floor-room--${camera} ${selected === camera ? 'active' : ''}`}
           onClick={() => selectCamera(camera)} aria-label={camera === 9 ? 'Вы находитесь здесь' : `Камера ${camera}`}>

@@ -1,4 +1,6 @@
 import type { GameState } from '../game/types';
+import { createInitialState } from '../game/constants';
+import { loadDeveloperConfig } from './developerConfig';
 
 const SAVE_KEY = 'last-night-at-freddy.phase-save.v1';
 const COMPLETED_KEY = 'last-night-at-freddy.completed.v1';
@@ -16,8 +18,10 @@ export function loadCheckpoint(): GameState | null {
   if (!raw) return null;
   try {
     const saved = JSON.parse(raw) as GameState;
+    const fallback = createInitialState(loadDeveloperConfig() ?? undefined);
     return {
       ...saved,
+      rules: saved.rules ?? fallback.rules,
       hasFlashlight: saved.hasFlashlight ?? saved.hasTape ?? false,
       computer: saved.computer === 'ON' || saved.computer === 'WORKING' ? 'OFF' : saved.computer,
     };

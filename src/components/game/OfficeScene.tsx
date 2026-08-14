@@ -25,6 +25,18 @@ export function OfficeScene(props: Props) {
 
   return <main className="office" onMouseMove={moveLight}
     onContextMenu={(event) => { event.preventDefault(); if (state.hasFlashlight) onFlashlight(); }}>
+    <div className="office-depth" aria-hidden="true">
+      <div className="back-wall">
+        <div className="wall-checkers" />
+        <div className="poster poster--celebrate"><b>CELEBRATE!</b><i /><i /><i /></div>
+        <div className="poster poster--rules"><b>RULES</b><i /><i /><i /></div>
+        <div className="wall-notes"><i /><i /><i /><i /><i /></div>
+      </div>
+      <div className="side-wall side-wall--left"><i /></div>
+      <div className="side-wall side-wall--right"><i /></div>
+      <div className="checker-floor" />
+      <div className="hanging-wires"><i /><i /><i /><i /></div>
+    </div>
     <div className="ceiling"><i /><i /><i /></div>
     <Door side="left" closed={state.leftDoor.closed} moving={state.leftDoor.moving} />
     <Door side="right" closed={state.rightDoor.closed} moving={state.rightDoor.moving} />
@@ -48,7 +60,9 @@ export function OfficeScene(props: Props) {
         <i className="chick-plush__tuft" /><i className="chick-plush__eye chick-plush__eye--left" />
         <i className="chick-plush__eye chick-plush__eye--right" /><b className="chick-plush__beak" />
       </div>
-      <div className="desk-fan"><i /><i /><i /><b /></div>
+      <div className="desk-fan" aria-label="Работающий настольный вентилятор">
+        <div className="desk-fan__rotor"><i /><i /><i /><b /></div>
+      </div>
       <button className={`drawer ${state.drawerOpen ? 'drawer--open' : ''}`} onClick={onDrawer}>
         <span>ТУМБА</span>
         {state.drawerOpen && <i className="drawer-inside">{!state.hasFlashlight && <b className="drawer-flashlight" />}{!state.hasTape && <b className="drawer-tape" />}</i>}

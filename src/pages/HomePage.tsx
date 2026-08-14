@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { MenuButtons } from '../components/menu/MenuButtons';
+import { DeveloperConsole } from '../components/menu/DeveloperConsole';
 import { NewGameConfirm } from '../components/menu/NewGameConfirm';
 import { playThunder } from '../lib/menuSound';
 import { clearGameSave, getSaveStatus } from '../lib/gameSave';
 import '../styles/main-menu.css';
+import '../styles/developer-console.css';
 
 type MenuStage = 'title' | 'flash' | 'menu' | 'confirm';
 
@@ -12,6 +14,7 @@ export function HomePage() {
   const [, navigate] = useLocation();
   const [stage, setStage] = useState<MenuStage>('title');
   const [selected, setSelected] = useState(0);
+  const [developerOpen, setDeveloperOpen] = useState(false);
   const saveStatus = getSaveStatus();
   const secondLabel = saveStatus === 'completed' ? 'RETRY?' : 'CONTINUE';
   const secondEnabled = saveStatus !== 'empty';
@@ -33,6 +36,7 @@ export function HomePage() {
   };
 
   useEffect(() => {
+    if (developerOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat) return;
       if (stage === 'title') {
@@ -54,7 +58,7 @@ export function HomePage() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  });
+  }, [developerOpen, secondEnabled, selected, stage]);
 
   return <main className={`main-menu ${stage === 'flash' ? 'main-menu--flash' : ''}`}>
     <section className="main-menu__panel">
@@ -69,7 +73,9 @@ export function HomePage() {
     </section>
     <section className="main-menu__art" aria-label="Five worn restaurant animatronics">
       <img src="/images/animatronics-menu-pixel.png" alt="Chick, Croco, Scrappy and Foxy beneath Freddy" />
+      <button className="freddy-nose-hotspot" aria-label="Нос Фредди" onClick={() => setDeveloperOpen(true)} />
       <div className="main-menu__scanlines" aria-hidden="true" />
     </section>
+    {developerOpen && <DeveloperConsole close={() => setDeveloperOpen(false)} />}
   </main>;
 }

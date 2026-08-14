@@ -10,6 +10,8 @@ export interface AnimatronicState {
   routeIndex: number;
   timer: number;
   arrival: number;
+  heldByDirector: boolean;
+  heldByRepair: boolean;
   lastRoutes: string[];
   litTime: number;
 }
@@ -28,6 +30,22 @@ export interface ProblemState {
   staticCount: number;
   rageAt: number;
   rageActive: boolean;
+}
+
+export interface AnimatronicRule {
+  enabled: boolean;
+  spawnTime: number;
+  speed: number;
+}
+
+export interface ProblemRule {
+  enabled: boolean;
+  at: number;
+}
+
+export interface GameRules {
+  animatronics: Record<AnimatronicName, AnimatronicRule>;
+  problems: Record<'outage' | 'static' | 'rage', ProblemRule>;
 }
 
 export interface GameState {
@@ -49,6 +67,7 @@ export interface GameState {
   repairOpen: boolean;
   wiresFixed: number[];
   selectedWire: number | null;
+  rules: GameRules;
   problems: ProblemState;
   animatronics: Record<AnimatronicName, AnimatronicState>;
   message: string;

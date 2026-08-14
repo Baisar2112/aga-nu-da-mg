@@ -1,52 +1,103 @@
 import { useEffect, useRef } from 'react';
+import { playHeavySteps, playMetalHit, playWarning } from './gameAudio';
+import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
-export function useGameSounds(message: string) {
-  const previous = useRef('');
+type AnimSnapshot = Record<AnimatronicName, Pick<AnimatronicState, 'mode' | 'routeIndex'>>;
+
+const snapshot = (state: GameState): AnimSnapshot => Object.fromEntries(
+  Object.entries(state.animatronics).map(([name, anim]) => [name, {
+    mode: anim.mode,
+    routeIndex: anim.routeIndex,
+  }]),
+) as AnimSnapshot;
+
+export function useGameSounds(state: GameState, isPaused = false) {
+  const audio = useRef<AudioContext | null>(null);
+  const fanAudio = useRef<HTMLAudioElement | null>(null);
+  const doorLoop = useRef<HTMLAudioElement | null>(null);
+  const doorThreatActive = useRef(false);
+  const previousMessage = useRef('');
+  const previousAnims = useRef(snapshot(state));
+  const paused = useRef(isPaused);
+
   useEffect(() => {
-    if (!message || message === previous.current) return;
-    previous.current = message;
-    if (message.includes('ударил') || message.includes('грохотом')) playMetalHit();
-    else if (message.includes('топот')) playWarning([120, 90, 135, 80]);
-    else if (message.includes('БЕШЕНСТВО')) playWarning([210, 170, 130]);
-    else if (message.includes('Фредди появился')) playWarning([190, 145, 110]);
-  }, [message]);
-}
+    paused.current = isPaused;
+    const context = audio.current;
+    if (isPaused) {
+      fanAudio.current?.pause();
+      doorLoop.current?.pause();
+      if (context?.state === 'running') void context.suspend();
+      return;
+    }
+    if (context?.state === 'suspended') void context.resume();
+    if (fanAudio.current?.paused) void fanAudio.current.play().catch(() => undefined);
+    if (doorThreatActive.current && doorLoop.current?.paused) {
+      void doorLoop.current.play().catch(() => undefined);
+    }
+  }, [isPaused]);
 
-function createAudio() {
-  return new AudioContext();
-}
+  useEffect(() => {
+    const startAudio = () => {
+      if (paused.current) return;
+      if (!audio.current) {
+        audio.current = new AudioContext();
+      }
+      if (audio.current.state === 'suspended') void audio.current.resume();
+      if (fanAudio.current?.paused) void fanAudio.current.play().catch(() => undefined);
+      if (doorThreatActive.current && doorLoop.current?.paused) {
+        void doorLoop.current.play().catch(() => undefined);
+      }
+    };
+    fanAudio.current = new Audio('/audio/fan-loop.m4a');
+    fanAudio.current.preload = 'auto';
+    fanAudio.current.loop = true;
+    fanAudio.current.volume = .2;
+    doorLoop.current = new Audio('/audio/animatronic-door.m4a');
+    doorLoop.current.preload = 'auto';
+    doorLoop.current.loop = true;
+    doorLoop.current.volume = .8;
+    startAudio();
+    window.addEventListener('pointerdown', startAudio);
+    window.addEventListener('keydown', startAudio);
+    return () => {
+      window.removeEventListener('pointerdown', startAudio);
+      window.removeEventListener('keydown', startAudio);
+      fanAudio.current?.pause();
+      doorLoop.current?.pause();
+      const currentAudio = audio.current;
+      audio.current = null;
+      fanAudio.current = null;
+      doorLoop.current = null;
+      if (currentAudio) void currentAudio.close();
+    };
+  }, []);
 
-function playWarning(frequencies: number[]) {
-  const audio = createAudio();
-  frequencies.forEach((frequency, index) => {
-    const oscillator = audio.createOscillator();
-    const gain = audio.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.value = frequency;
-    gain.gain.setValueAtTime(0.001, audio.currentTime + index * .13);
-    gain.gain.exponentialRampToValueAtTime(.08, audio.currentTime + index * .13 + .02);
-    gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + index * .13 + .12);
-    oscillator.connect(gain).connect(audio.destination);
-    oscillator.start(audio.currentTime + index * .13);
-    oscillator.stop(audio.currentTime + index * .13 + .13);
-  });
-  window.setTimeout(() => void audio.close(), 1000);
-}
+  useEffect(() => {
+    if (isPaused) return;
+    const context = audio.current;
+    doorThreatActive.current = !state.gameOver && !state.won
+      && Object.values(state.animatronics).some((anim) => anim.mode === 'door');
+    if (doorThreatActive.current && doorLoop.current?.paused) {
+      void doorLoop.current.play().catch(() => undefined);
+    } else if (!doorThreatActive.current && doorLoop.current && !doorLoop.current.paused) {
+      doorLoop.current.pause();
+      doorLoop.current.currentTime = 0;
+    }
 
-function playMetalHit() {
-  const audio = createAudio();
-  const length = Math.floor(audio.sampleRate * .35);
-  const buffer = audio.createBuffer(1, length, audio.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * Math.exp(-index / (length * .16));
-  const source = audio.createBufferSource();
-  const filter = audio.createBiquadFilter();
-  const gain = audio.createGain();
-  filter.type = 'bandpass';
-  filter.frequency.value = 420;
-  gain.gain.value = .25;
-  source.buffer = buffer;
-  source.connect(filter).connect(gain).connect(audio.destination);
-  source.start();
-  window.setTimeout(() => void audio.close(), 600);
+    (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
+      const current = state.animatronics[name];
+      const previous = previousAnims.current[name];
+      const startedMoving = current.mode === 'moving' && previous.mode !== 'moving';
+      const changedCamera = current.mode === 'moving' && current.routeIndex > previous.routeIndex;
+      if (context && (startedMoving || changedCamera)) playHeavySteps(context);
+    });
+    previousAnims.current = snapshot(state);
+
+    if (!state.message || state.message === previousMessage.current || !context) return;
+    previousMessage.current = state.message;
+    if (state.message.includes('ударил') || state.message.includes('грохотом')) playMetalHit(context);
+    else if (state.message.includes('топот')) playWarning(context, [120, 90, 135, 80]);
+    else if (state.message.includes('БЕШЕНСТВО')) playWarning(context, [210, 170, 130]);
+    else if (state.message.includes('Фредди появился')) playWarning(context, [190, 145, 110]);
+  }, [isPaused, state]);
 }

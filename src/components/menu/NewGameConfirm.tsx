@@ -5,7 +5,8 @@ export function NewGameConfirm({ onConfirm, onCancel }: { onConfirm: () => void;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code === 'KeyW' || event.code === 'KeyS') setChoice((value) => value === 'yes' ? 'no' : 'yes');
+      if (event.code === 'KeyA') setChoice('yes');
+      if (event.code === 'KeyD') setChoice('no');
       if (event.code === 'Escape') onCancel();
       if (event.code === 'Space') {
         event.preventDefault();

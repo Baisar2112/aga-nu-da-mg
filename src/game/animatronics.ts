@@ -1,10 +1,15 @@
-import { BASE_SPEED, SPAWN_TIMES } from './constants';
+import { BASE_SPEED } from './constants';
+import { applyRepairGate, consumeRepairAttackTimer, isHeldByRepair, shouldWaitBeforeDoor } from './repairGate';
+import { applyThreatDirector } from './threatDirector';
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
 const fixedRoutes = {
   crocodile: ['1', '2', '7', 'left'],
   fox: ['1', '3', '5', '6', 'run'],
 };
+
+const routeCooldown = () => Math.floor(Math.random() * 13) + 5;
+const retreatTime = (state: GameState) => state.problems.rageActive ? 3 : 1;
 
 function chooseRoute(name: 'dog' | 'freddy', previous: string[]) {
   if (name === 'dog') {
@@ -27,11 +32,19 @@ function reset(anim: AnimatronicState) {
     ? chooseRoute(anim.name, anim.lastRoutes)
     : anim.name === 'chick' ? ['2', 'office'] : fixedRoutes[anim.name];
   anim.lastRoutes = [...anim.lastRoutes.slice(-1), route[route.length - 1] ?? ''];
-  Object.assign(anim, { route, routeIndex: 0, mode: 'waiting', timer: 15, litTime: 0 });
+  Object.assign(anim, {
+    route,
+    routeIndex: 0,
+    mode: 'waiting',
+    timer: routeCooldown(),
+    litTime: 0,
+    heldByDirector: false,
+    heldByRepair: false,
+  });
 }
 
 function defend(anim: AnimatronicState, state: GameState, message: string) {
-  Object.assign(anim, { mode: 'retreating', timer: 3 });
+  Object.assign(anim, { mode: 'retreating', timer: retreatTime(state) });
   Object.assign(state, { message, messageTime: 3 });
 }
 
@@ -73,10 +86,12 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   }
   if (anim.mode === 'office') {
     if ((anim.timer -= dt) <= 0) {
-      state.problems.outageActive = true;
-      state.wiresFixed = [];
-      state.selectedWire = null;
-      Object.assign(state, { message: 'Цыплёнок повредил провода! Нужен ремонт.', messageTime: 5 });
+      if (state.rules.problems.outage.enabled) {
+        state.problems.outageActive = true;
+        state.wiresFixed = [];
+        state.selectedWire = null;
+        Object.assign(state, { message: 'Цыплёнок повредил провода! Нужен ремонт.', messageTime: 5 });
+      }
       reset(anim);
     }
     return;
@@ -92,20 +107,27 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   }
   const multiplier = (state.problems.rageActive ? 1.5 : 1) / (state.computer === 'REBOOTING' ? 1.5 : 1);
   anim.timer += dt;
-  if (anim.timer < 15 / (BASE_SPEED[anim.name] * multiplier)) return;
+  const movementTime = 15 / ((state.rules.animatronics[anim.name]?.speed ?? BASE_SPEED[anim.name]) * multiplier);
+  if (anim.timer < movementTime) return;
+  if (shouldWaitBeforeDoor(anim, state)) {
+    anim.timer = movementTime;
+    anim.heldByRepair = true;
+    return;
+  }
   anim.timer = 0;
   anim.routeIndex += 1;
   const spot = anim.route[anim.routeIndex];
   if (spot === 'office') Object.assign(anim, { mode: 'office', timer: 6 });
   if (spot === 'run') {
-    Object.assign(anim, { mode: 'running', timer: 3 });
+    Object.assign(anim, { mode: 'running', timer: consumeRepairAttackTimer(anim, 3), arrival: state.elapsed });
     Object.values(state.animatronics).forEach((other) => {
       if (other.name !== 'fox' && other.name !== 'chick' && other.mode === 'moving') other.timer = Math.max(0, other.timer - 2);
     });
     Object.assign(state, { message: 'Быстрый топот справа!', messageTime: 3 });
   }
   if (spot === 'left' || spot === 'right') {
-    const timer = anim.name === 'crocodile' ? 9 : anim.name === 'freddy' ? (spot === 'left' ? 1 : 1.5) : 5;
+    const normalTimer = anim.name === 'crocodile' ? 9 : anim.name === 'freddy' ? (spot === 'left' ? 1 : 1.5) : 5;
+    const timer = consumeRepairAttackTimer(anim, normalTimer);
     Object.assign(anim, { mode: 'door', timer, arrival: state.elapsed });
   }
   if (spot === 'window') {
@@ -117,11 +139,23 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
 export function stepAnimatronics(state: GameState, dt: number) {
   (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
     const anim = state.animatronics[name];
-    if (anim.mode === 'hidden' && state.elapsed >= SPAWN_TIMES[name]) {
+    const rule = state.rules.animatronics[name];
+    if (anim.mode === 'hidden' && rule.enabled && state.elapsed >= rule.spawnTime) {
       reset(anim);
       Object.assign(state, { message: `${label(name)} появился на камере ${anim.route[0]}.`, messageTime: 3 });
     }
-    if (anim.mode !== 'hidden') advance(anim, state, dt);
+  });
+
+  applyRepairGate(state);
+  const released = applyThreatDirector(state);
+  if (released) Object.assign(state, {
+    message: `${label(released)} атакует через 1 секунду!`,
+    messageTime: 1,
+  });
+
+  (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
+    const anim = state.animatronics[name];
+    if (anim.mode !== 'hidden' && !anim.heldByDirector && !isHeldByRepair(anim, state)) advance(anim, state, dt);
   });
 }
 
