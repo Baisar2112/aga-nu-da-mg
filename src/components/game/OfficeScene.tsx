@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react';
 import type { GameState } from '../../game/types';
+import { DoorThreats, WindowThreat } from './ThreatSprites';
 
 interface Props {
   state: GameState;
@@ -21,8 +22,6 @@ export function OfficeScene(props: Props) {
     setPointer({ x, y });
     onAim(x > 27 && x < 73 && y > 14 && y < 67);
   };
-  const roomThreat = [anims.dog, anims.freddy].find((anim) => anim.mode === 'window');
-
   return <main className="office" onMouseMove={moveLight}
     onContextMenu={(event) => { event.preventDefault(); if (state.hasFlashlight) onFlashlight(); }}>
     <div className="office-depth" aria-hidden="true">
@@ -38,19 +37,15 @@ export function OfficeScene(props: Props) {
       <div className="hanging-wires"><i /><i /><i /><i /></div>
     </div>
     <div className="ceiling"><i /><i /><i /></div>
-    <Door side="left" closed={state.leftDoor.closed} moving={state.leftDoor.moving} />
-    <Door side="right" closed={state.rightDoor.closed} moving={state.rightDoor.moving} />
+    <Door side="left" closed={state.leftDoor.closed} moving={state.leftDoor.moving} blocked={state.leftDoor.blocked} />
+    <Door side="right" closed={state.rightDoor.closed} moving={state.rightDoor.moving} blocked={state.rightDoor.blocked} />
     <div className="door-control door-control--left"><i /><i /></div>
     <div className="door-control door-control--right"><i /><i /></div>
     <div className="window-frame">
       <div className="room-eight"><span className="room-eight__sign">ROOM 8</span><i /><i /><i /></div>
-      {roomThreat && <div className={`window-creature ${state.flashlightOn && state.flashlightAtWindow ? 'visible' : ''}`}>
-        <span>●</span><span>●</span><b>{roomThreat.name === 'freddy' ? 'ФРЕДДИ' : 'СКРЕППИ'}</b>
-      </div>}
+      <WindowThreat animatronics={anims} isLit={state.flashlightOn && state.flashlightAtWindow} />
     </div>
-    {anims.crocodile.mode === 'door' && <div className={`left-threat ${state.flashlightOn && !state.flashlightAtWindow ? 'revealed' : ''}`}><i /><b>КРОКО</b></div>}
-    {anims.dog.mode === 'door' && <div className="right-eyes"><i /><i /></div>}
-    {anims.fox.mode === 'running' && <div className="fox-shadow">БЕГ →</div>}
+    <DoorThreats animatronics={anims} leftIsLit={state.flashlightOn && !state.flashlightAtWindow} />
     <button className={`chick ${anims.chick.mode === 'office' ? 'chick--present' : ''} ${anims.chick.mode === 'office' && state.flashlightOn ? 'chick--lit' : ''}`} onClick={onChick} aria-label="Прогнать Чика"><i>●</i><i>●</i><b>▲</b></button>
     <button className="fuse-box" onClick={onBox}><span>⚡</span><small>ЩИТОК</small></button>
     <div className="desk">
@@ -72,6 +67,6 @@ export function OfficeScene(props: Props) {
   </main>;
 }
 
-function Door({ side, closed, moving }: { side: 'left' | 'right'; closed: boolean; moving: boolean }) {
-  return <div className={`office-door office-door--${side} ${closed ? 'office-door--closed' : ''} ${moving ? 'office-door--moving' : ''}`}><div className="door-slab"><i /><i /><i /></div></div>;
+function Door({ side, closed, moving, blocked }: { side: 'left' | 'right'; closed: boolean; moving: boolean; blocked: boolean }) {
+  return <div className={`office-door office-door--${side} ${closed ? 'office-door--closed' : ''} ${moving ? 'office-door--moving' : ''} ${blocked ? 'office-door--blocked' : ''}`}><div className="door-slab"><i /><i /><i /></div></div>;
 }

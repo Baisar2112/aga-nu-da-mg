@@ -33,6 +33,8 @@ function updatePower(state: GameState, dt: number) {
     state.rightDoor.closed = false;
     state.leftDoor.moving = false;
     state.rightDoor.moving = false;
+    state.leftDoor.blocked = false;
+    state.rightDoor.blocked = false;
   }
   if (state.computer === 'REBOOTING') {
     state.rebootTime = Math.max(0, state.rebootTime - dt);
@@ -57,12 +59,14 @@ function updateProblems(state: GameState, _dt: number) {
     state.rightDoor.closed = false;
     state.leftDoor.moving = false;
     state.rightDoor.moving = false;
+    state.leftDoor.blocked = false;
+    state.rightDoor.blocked = false;
     Object.assign(state, { message: 'Авария питания! Возьмите изоленту и почините щиток.', messageTime: 6 });
   }
   if (!problem.staticActive && problem.staticCount < 3 && state.elapsed >= problem.staticAt) {
     problem.staticActive = true;
     problem.staticAt = 999;
-    Object.assign(state, { message: 'На камерах сильные помехи. Нужна перезагрузка.', messageTime: 5 });
+    Object.assign(state, { message: 'Датчик движения сломан. Нужна перезагрузка.', messageTime: 5 });
   }
   if (!problem.rageActive && state.elapsed >= problem.rageAt) {
     problem.rageActive = true;

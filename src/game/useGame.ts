@@ -50,12 +50,15 @@ export function useGame(isPaused = false) {
       if (current.energy <= 0 || current.problems.outageActive || current.gameOver || current.won) return current;
       const own = side === 'left' ? current.leftDoor : current.rightDoor;
       const other = side === 'left' ? current.rightDoor : current.leftDoor;
-      if (own.moving || (!own.closed && other.closed)) return current;
+      if (own.moving) return current;
       const next = structuredClone(current);
-      (side === 'left' ? next.leftDoor : next.rightDoor).moving = true;
+      const door = side === 'left' ? next.leftDoor : next.rightDoor;
+      door.moving = true;
+      if (!door.closed && other.closed) door.blocked = true;
+      else door.closed = !door.closed;
       return next;
     });
-    let remaining = 500;
+    let remaining = 100;
     let previousTick = performance.now();
     const finishMovement = () => {
       const now = performance.now();
@@ -69,8 +72,16 @@ export function useGame(isPaused = false) {
         const next = structuredClone(current);
         const door = side === 'left' ? next.leftDoor : next.rightDoor;
         if (!door.moving) return current;
-        door.closed = !door.closed;
-        door.moving = false;
+        if (door.blocked) {
+          door.blocked = false;
+          window.setTimeout(() => setState((latest) => {
+            const finished = structuredClone(latest);
+            const returningDoor = side === 'left' ? finished.leftDoor : finished.rightDoor;
+            if (!returningDoor.moving || returningDoor.blocked) return latest;
+            returningDoor.moving = false;
+            return finished;
+          }), 100);
+        } else door.moving = false;
         return next;
       });
     };

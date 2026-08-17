@@ -8,7 +8,7 @@ import { clearGameSave, getSaveStatus } from '../lib/gameSave';
 import '../styles/main-menu.css';
 import '../styles/developer-console.css';
 
-type MenuStage = 'title' | 'flash' | 'menu' | 'confirm';
+type MenuStage = 'title' | 'reveal' | 'flash' | 'menu' | 'confirm';
 
 export function HomePage() {
   const [, navigate] = useLocation();
@@ -43,8 +43,9 @@ export function HomePage() {
         if (event.code !== 'Space') return;
         event.preventDefault();
         playThunder();
-        setStage('flash');
-        window.setTimeout(() => setStage('menu'), 300);
+        setStage('reveal');
+        window.setTimeout(() => setStage('flash'), 100);
+        window.setTimeout(() => setStage('menu'), 400);
         return;
       }
       if (stage === 'confirm') return;
@@ -60,19 +61,19 @@ export function HomePage() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [developerOpen, secondEnabled, selected, stage]);
 
-  return <main className={`main-menu ${stage === 'flash' ? 'main-menu--flash' : ''}`}>
+  return <main className={`main-menu${stage === 'reveal' ? ' main-menu--reveal' : ''}${stage === 'flash' ? ' main-menu--flash' : ''}`}>
     <section className="main-menu__panel">
       <div className="main-menu__noise" aria-hidden="true" />
-      {stage === 'title' || stage === 'flash' ? <>
-        <p className="main-menu__year">EST. 2000</p>
-        <h1>LAST NIGHT<br />AT...<br /><span>FREDDY?</span></h1>
+      <h1>LAST NIGHT<br />AT...<br /><span>FREDDY?</span></h1>
+      {stage === 'title' || stage === 'reveal' || stage === 'flash' ?
         <p className="main-menu__prompt">PRESS SPACE</p>
-      </> : <MenuButtons selected={selected} secondLabel={secondLabel}
+        : <MenuButtons selected={selected} secondLabel={secondLabel}
         secondEnabled={secondEnabled} onHover={setSelected} onChoose={choose} />}
       {stage === 'confirm' && <NewGameConfirm onConfirm={startNewGame} onCancel={() => setStage('menu')} />}
     </section>
     <section className="main-menu__art" aria-label="Five worn restaurant animatronics">
       <img src="/images/animatronics-menu-pixel.png" alt="Chick, Croco, Scrappy and Foxy beneath Freddy" />
+      <img className="main-menu__art-flash" src="/images/animatronics-menu-flash.png" alt="" aria-hidden="true" />
       <button className="freddy-nose-hotspot" aria-label="Нос Фредди" onClick={() => setDeveloperOpen(true)} />
       <div className="main-menu__scanlines" aria-hidden="true" />
     </section>

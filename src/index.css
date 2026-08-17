@@ -1,6 +1,8 @@
 @import '@fontsource/press-start-2p';
+@import './styles/virtual-viewport.css';
 @import './styles/game-office.css';
 @import './styles/office-layout.css';
+@import './styles/threat-sprites.css';
 @import './styles/game-ui.css';
 @import './styles/tablet.css';
 @import './styles/pixel-theme.css';

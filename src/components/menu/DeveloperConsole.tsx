@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { GAME_MINUTES, NIGHT_SECONDS } from '../../game/constants';
+import { GAME_MINUTES, GAME_START_MINUTES, NIGHT_SECONDS } from '../../game/constants';
 import type { AnimatronicName, GameRules, ProblemRule } from '../../game/types';
 import {
   ANIMATRONIC_LABELS, ANIMATRONIC_NAMES, clearDeveloperConfig,
@@ -8,7 +8,7 @@ import {
 
 const PROBLEMS: Array<{ name: keyof GameRules['problems']; label: string }> = [
   { name: 'outage', label: 'Авария питания' },
-  { name: 'static', label: 'Помехи камер' },
+  { name: 'static', label: 'Сбой датчика движения' },
   { name: 'rage', label: 'Бешенство' },
 ];
 
@@ -105,13 +105,14 @@ function NumberField({ label, value, change, step = 1 }: { label: string; value:
 
 function GameTimeField({ label, value, change }: { label: string; value: number; change: (value: number) => void }) {
   return <label className="developer-number"><span>{label}, ЧЧ:ММ</span>
-    <input type="time" min="00:00" max="06:00" step="60" value={secondsToGameTime(value)}
+    <input type="time" step="60" value={secondsToGameTime(value)}
       onChange={(event) => change(gameTimeToSeconds(event.target.value))} />
   </label>;
 }
 
 function secondsToGameTime(seconds: number) {
-  const totalMinutes = Math.round(clamp(seconds, 0, NIGHT_SECONDS) * GAME_MINUTES / NIGHT_SECONDS);
+  const elapsedMinutes = Math.round(clamp(seconds, 0, NIGHT_SECONDS) * GAME_MINUTES / NIGHT_SECONDS);
+  const totalMinutes = (GAME_START_MINUTES + elapsedMinutes) % (24 * 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -119,8 +120,9 @@ function secondsToGameTime(seconds: number) {
 
 function gameTimeToSeconds(value: string) {
   const [hours, minutes] = value.split(':').map(Number);
-  const totalMinutes = clamp(hours * 60 + minutes, 0, GAME_MINUTES);
-  return totalMinutes * NIGHT_SECONDS / GAME_MINUTES;
+  const clockMinutes = hours * 60 + minutes;
+  const elapsedMinutes = (clockMinutes - GAME_START_MINUTES + 24 * 60) % (24 * 60);
+  return clamp(elapsedMinutes, 0, GAME_MINUTES) * NIGHT_SECONDS / GAME_MINUTES;
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));

@@ -19,6 +19,7 @@ export interface AnimatronicState {
 export interface DoorState {
   closed: boolean;
   moving: boolean;
+  blocked: boolean;
 }
 
 export interface ProblemState {
@@ -50,6 +51,7 @@ export interface GameRules {
 
 export interface GameState {
   elapsed: number;
+  timeLayoutVersion: number;
   energy: number;
   flashlightBattery: number;
   hasFlashlight: boolean;
@@ -60,6 +62,7 @@ export interface GameState {
   computerUseTime: number;
   rebootTime: number;
   selectedCamera: number;
+  cameraLayoutVersion: number;
   leftDoor: DoorState;
   rightDoor: DoorState;
   drawerOpen: boolean;

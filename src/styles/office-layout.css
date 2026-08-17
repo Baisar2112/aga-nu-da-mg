@@ -68,23 +68,11 @@
   border: 0;
   background: transparent;
   box-shadow: none;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .room-eight { visibility: hidden; }
-.window-creature {
-  z-index: 3;
-  inset: 20% 34% 0;
-  border: 0;
-  background: #111;
-  clip-path: polygon(20% 12%, 38% 0, 62% 0, 80% 12%, 96% 55%, 86% 100%, 14% 100%, 4% 55%);
-}
-
-.left-threat { z-index: 7; left: 5%; top: 35%; }
-.left-threat.revealed { left: 5%; top: 25%; width: 11%; height: 48%; }
-.right-eyes { z-index: 7; right: 8%; top: 47%; }
-.fox-shadow { z-index: 7; right: 10%; top: 45%; }
-
 /* Existing interactions remain available without repainting the generated desk. */
 .desk {
   z-index: 8;
@@ -168,8 +156,8 @@
 
 .fuse-box {
   z-index: 8;
-  left: 65%;
-  top: 8%;
+  left: 21.2%;
+  top: 52.8%;
   width: 43px;
   height: 57px;
   opacity: .78;
@@ -179,12 +167,4 @@
 .flashlight-beam {
   z-index: 10;
   background: radial-gradient(circle 220px at var(--light-x) var(--light-y), rgba(255, 248, 200, .42), rgba(255, 248, 200, .12) 48%, transparent 76%);
-}
-
-@media (max-width: 720px) {
-  .office-door { width: 12%; }
-  .office-door--left { left: 4%; }
-  .office-door--right { right: 4%; }
-  .desk { right: 24%; left: 24%; }
-  .window-frame { left: 29%; width: 42%; }
 }

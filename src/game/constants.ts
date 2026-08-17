@@ -1,14 +1,21 @@
 import type { AnimatronicName, GameRules, GameState } from './types';
 
-export const NIGHT_SECONDS = 480;
-export const GAME_MINUTES = 360;
-export const FIRST_PHASE_SECONDS = 160;
+export const NIGHT_SECONDS = 510;
+export const GAME_START_MINUTES = 23 * 60 + 30;
+export const GAME_MINUTES = 390;
+export const FIRST_PHASE_SECONDS = NIGHT_SECONDS / 3;
+
+export function clockMinutesToElapsed(clockMinutes: number) {
+  const minutesFromStart = (clockMinutes - GAME_START_MINUTES + 24 * 60) % (24 * 60);
+  return minutesFromStart * NIGHT_SECONDS / GAME_MINUTES;
+}
+
 export const SPAWN_TIMES: Record<AnimatronicName, number> = {
-  crocodile: 20,
-  dog: 80 / 3,
-  fox: 560 / 3,
-  chick: 200,
-  freddy: 320,
+  crocodile: clockMinutesToElapsed(15),
+  dog: clockMinutesToElapsed(20),
+  fox: clockMinutesToElapsed(2 * 60 + 20),
+  chick: clockMinutesToElapsed(2 * 60 + 30),
+  freddy: clockMinutesToElapsed(4 * 60),
 };
 
 export const BASE_SPEED: Record<AnimatronicName, number> = {
@@ -16,7 +23,7 @@ export const BASE_SPEED: Record<AnimatronicName, number> = {
   dog: 1,
   fox: 2,
   chick: 3,
-  freddy: 0.75,
+  freddy: 0.7,
 };
 
 const animatronic = (name: AnimatronicName) => ({
@@ -38,6 +45,7 @@ export function createInitialState(customRules?: GameRules): GameState {
   const rules = customRules ? structuredClone(customRules) : createDefaultRules();
   return {
     elapsed: 0,
+    timeLayoutVersion: 2,
     energy: 100,
     flashlightBattery: 100,
     hasFlashlight: false,
@@ -47,9 +55,10 @@ export function createInitialState(customRules?: GameRules): GameState {
     computer: 'OFF',
     computerUseTime: 0,
     rebootTime: 0,
-    selectedCamera: 1,
-    leftDoor: { closed: false, moving: false },
-    rightDoor: { closed: false, moving: false },
+    selectedCamera: 7,
+    cameraLayoutVersion: 2,
+    leftDoor: { closed: false, moving: false, blocked: false },
+    rightDoor: { closed: false, moving: false, blocked: false },
     drawerOpen: false,
     hasTape: false,
     repairOpen: false,
@@ -90,9 +99,9 @@ function createDefaultRules(): GameRules {
       freddy: { enabled: true, spawnTime: SPAWN_TIMES.freddy, speed: BASE_SPEED.freddy },
     },
     problems: {
-      outage: { enabled: true, at: between(40, 140) },
-      static: { enabled: true, at: between(520 / 3, 240) },
-      rage: { enabled: true, at: between(360, 440) },
+      outage: { enabled: true, at: between(clockMinutesToElapsed(30), clockMinutesToElapsed(105)) },
+      static: { enabled: true, at: between(clockMinutesToElapsed(130), clockMinutesToElapsed(180)) },
+      rage: { enabled: true, at: between(clockMinutesToElapsed(270), clockMinutesToElapsed(330)) },
     },
   };
 }

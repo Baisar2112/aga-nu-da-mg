@@ -1,0 +1,73 @@
+.threat-sprite {
+  position: absolute;
+  z-index: 7;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  image-rendering: pixelated;
+  filter: brightness(.42) contrast(1.15) saturate(.55);
+}
+
+.threat-sprite.is-lit { filter: brightness(.95) contrast(1.12) saturate(.65); }
+
+.threat-sprite--window {
+  z-index: 3;
+  top: 3%;
+  left: 7%;
+  width: 86%;
+  height: 102%;
+  object-position: center bottom;
+  opacity: .48;
+}
+
+.threat-sprite--window.is-lit { opacity: .96; }
+.threat-sprite--freddy-window { left: 9%; width: 82%; }
+
+.door-threat-slot {
+  position: absolute;
+  z-index: 3;
+  top: 18%;
+  bottom: 23%;
+  width: 9.5%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.door-threat-slot--left {
+  left: 6.3%;
+  clip-path: polygon(0 2%, 100% 6%, 100% 94%, 0 98%);
+}
+
+.door-threat-slot--right {
+  right: 6.3%;
+  clip-path: polygon(0 6%, 100% 2%, 100% 98%, 0 94%);
+}
+
+.threat-sprite--door { top: 3%; width: 190%; height: 94%; }
+.door-threat-slot--left .threat-sprite--door { left: -72%; object-position: right center; opacity: .42; }
+.door-threat-slot--left .threat-sprite--crocodile { left: -84%; }
+.door-threat-slot--right .threat-sprite--door { right: -72%; object-position: left center; opacity: .56; }
+.threat-sprite--door.is-lit { opacity: 1; }
+.threat-sprite--freddy-door { filter: brightness(.34) contrast(1.22) saturate(.42); }
+.threat-sprite--freddy-door.is-lit { filter: brightness(.88) contrast(1.18) saturate(.55); }
+
+.threat-sprite--fox-running {
+  top: 18%;
+  right: 3%;
+  width: 31%;
+  height: 58%;
+  object-position: right center;
+  opacity: .9;
+  animation: fox-lunge .12s steps(2) infinite;
+}
+
+@keyframes fox-lunge {
+  50% { transform: translateX(-7%); }
+}
+
+@media (max-width: 720px) {
+  .door-threat-slot { width: 10.5%; }
+  .door-threat-slot--left { left: 5.5%; }
+  .door-threat-slot--right { right: 5.5%; }
+  .threat-sprite--fox-running { width: 38%; }
+}

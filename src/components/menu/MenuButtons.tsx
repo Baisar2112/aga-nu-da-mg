@@ -9,7 +9,6 @@ interface MenuButtonsProps {
 export function MenuButtons(props: MenuButtonsProps) {
   const { selected, secondLabel, secondEnabled, onHover, onChoose } = props;
   return <div className="menu-buttons">
-    <p className="menu-buttons__eyebrow">SELECT / W S / SPACE</p>
     <button className={selected === 0 ? 'is-selected' : ''}
       onMouseEnter={() => onHover(0)} onClick={() => onChoose(0)}>
       <span aria-hidden="true">{selected === 0 ? '▶' : ''}</span> NEW GAME

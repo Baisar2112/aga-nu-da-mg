@@ -27,7 +27,6 @@
 }
 
 .door-slab,
-.window-creature,
 .chick,
 .drawer,
 .game-message,
@@ -39,16 +38,13 @@
   box-shadow: none;
 }
 
-.door-slab { transition: transform .2s steps(4); }
-.window-creature { transition: opacity .15s steps(2); }
+.door-slab { transition: transform .1s steps(4); }
 .computer-overlay,
 .panel-backdrop { backdrop-filter: none; }
 .ceiling i { filter: none; box-shadow: none; }
-.right-eyes i { border-radius: 0; box-shadow: 0 0 0 4px #343424; }
-.window-creature span { text-shadow: 4px 4px #333; }
 .flashlight-beam { mix-blend-mode: normal; opacity: .72; }
 
-.hud-time strong { font-family: inherit; font-size: 26px; }
+.hud-time strong { font-family: inherit; }
 .hud-time span,
 .meter,
 .meter b,

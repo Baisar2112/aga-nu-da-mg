@@ -6,7 +6,10 @@ import { GameHud } from '../components/game/GameHud';
 import { OfficeScene } from '../components/game/OfficeScene';
 import { PauseMenu } from '../components/game/PauseMenu';
 import { RepairPanel } from '../components/game/RepairPanel';
+import { TouchControls } from '../components/game/TouchControls';
+import { VirtualViewport } from '../components/layout/VirtualViewport';
 import { FIRST_PHASE_SECONDS } from '../game/constants';
+import { resetAnimatronic } from '../game/animatronics';
 import { useGame } from '../game/useGame';
 import { useGameSounds } from '../game/useGameSounds';
 
@@ -71,9 +74,7 @@ export function GamePage() {
   });
 
   const computerVisible = ['WORKING', 'CAMERA_VIEW', 'REBOOTING'].includes(state.computer);
-  return <div className={`game-shell${isPaused ? ' game-shell--paused' : ''}`}>
-    <GameHud state={state} />
-    <OfficeScene state={state} onDrawer={openDrawer}
+  const office = <OfficeScene state={state} onDrawer={openDrawer}
       onFlashlight={() => game.setFlashlight(!state.flashlightOn)}
       onAim={(atRoomEight) => action((next) => { next.flashlightAtWindow = atRoomEight; })}
       onBox={() => action((next) => {
@@ -82,18 +83,25 @@ export function GamePage() {
       })}
       onChick={() => action((next) => {
         if (next.animatronics.chick.mode === 'office') {
-          next.animatronics.chick.mode = 'retreating';
-          next.animatronics.chick.timer = next.problems.rageActive ? 3 : 1;
+          resetAnimatronic(next.animatronics.chick);
           Object.assign(next, { message: 'Чик прогнан.', messageTime: 3 });
         }
-      })} />
+      })} />;
+
+  return <VirtualViewport className={`game-shell${isPaused ? ' game-shell--paused' : ''}`} world={office}>
+    <GameHud state={state} />
     <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
-    {state.message && <div className="game-message">{state.message}</div>}
-    {computerVisible && <ComputerScreen state={state} selectCamera={(camera) => action((next) => { next.selectedCamera = camera; next.computer = 'CAMERA_VIEW'; })} reboot={() => action((next) => { next.computer = 'REBOOTING'; next.rebootTime = 15; next.flashlightPulse = 0; })} />}
+    {!isPaused && !computerVisible && !state.repairOpen && !state.gameOver && !state.won &&
+      <TouchControls onLeftDoor={() => game.toggleDoor('left')} onRightDoor={() => game.toggleDoor('right')}
+        onTablet={game.toggleTablet} onFlashlight={() => game.setFlashlight(!state.flashlightOn)}
+        onPause={() => { setIsPaused(true); setPauseSelection(0); }} />}
+    {computerVisible && <ComputerScreen state={state} close={game.toggleTablet}
+      selectCamera={(camera) => action((next) => { next.selectedCamera = camera; next.computer = 'CAMERA_VIEW'; })}
+      reboot={() => action((next) => { next.computer = 'REBOOTING'; next.rebootTime = 15; next.flashlightPulse = 0; })} />}
     {state.repairOpen && <RepairPanel state={state} selectWire={selectWire} close={() => action((next) => { next.repairOpen = false; })} />}
     {isPaused && <PauseMenu selected={pauseSelection} onSelect={setPauseSelection}
       onContinue={() => setIsPaused(false)} onExit={() => navigate('/')} />}
     {(state.gameOver || state.won) && <EndScreen won={state.won} reason={state.gameOver}
       restart={game.restart} openMenu={() => navigate('/')} />}
-  </div>;
+  </VirtualViewport>;
 }

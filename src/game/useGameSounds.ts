@@ -51,7 +51,7 @@ export function useGameSounds(state: GameState, isPaused = false) {
     fanAudio.current = new Audio('/audio/fan-loop.m4a');
     fanAudio.current.preload = 'auto';
     fanAudio.current.loop = true;
-    fanAudio.current.volume = .2;
+    fanAudio.current.volume = .19;
     doorLoop.current = new Audio('/audio/animatronic-door.m4a');
     doorLoop.current.preload = 'auto';
     doorLoop.current.loop = true;
@@ -87,9 +87,12 @@ export function useGameSounds(state: GameState, isPaused = false) {
     (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
       const current = state.animatronics[name];
       const previous = previousAnims.current[name];
-      const startedMoving = current.mode === 'moving' && previous.mode !== 'moving';
-      const changedCamera = current.mode === 'moving' && current.routeIndex > previous.routeIndex;
-      if (context && (startedMoving || changedCamera)) playHeavySteps(context);
+      const previousSpot = current.route[previous.routeIndex];
+      const currentSpot = current.route[current.routeIndex];
+      const changedCamera = current.routeIndex > previous.routeIndex
+        && /^\d+$/.test(previousSpot ?? '')
+        && /^\d+$/.test(currentSpot ?? '');
+      if (context && changedCamera) playHeavySteps(context);
     });
     previousAnims.current = snapshot(state);
 

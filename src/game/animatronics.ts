@@ -4,20 +4,19 @@ import { applyThreatDirector } from './threatDirector';
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
 const fixedRoutes = {
-  crocodile: ['1', '2', '7', 'left'],
-  fox: ['1', '3', '5', '6', 'run'],
+  crocodile: ['7', '2', '1', 'left'],
+  fox: ['7', '3', '5', '6', 'run'],
 };
 
 const routeCooldown = () => Math.floor(Math.random() * 13) + 5;
-const retreatTime = (state: GameState) => state.problems.rageActive ? 3 : 1;
 
 function chooseRoute(name: 'dog' | 'freddy', previous: string[]) {
   if (name === 'dog') {
-    return Math.random() < 0.5 ? ['1', '3', '5', '6', 'right'] : ['1', '3', '5', '8', 'window'];
+    return Math.random() < 0.5 ? ['7', '3', '5', '6', 'right'] : ['7', '3', '5', '8', 'window'];
   }
   const options = [
     ['4', '3', '5', '6', 'right'],
-    ['4', '3', '1', '2', '7', 'left'],
+    ['4', '3', '7', '2', '1', 'left'],
     ['4', '3', '5', '8', 'window'],
   ];
   const repeated = previous.length >= 2 && previous[previous.length - 1] === previous[previous.length - 2] ? previous[previous.length - 1] : '';
@@ -27,7 +26,7 @@ function chooseRoute(name: 'dog' | 'freddy', previous: string[]) {
   return allowed.find((route) => route[route.length - 1] === preferred) ?? allowed[0];
 }
 
-function reset(anim: AnimatronicState) {
+export function resetAnimatronic(anim: AnimatronicState) {
   const route = anim.name === 'dog' || anim.name === 'freddy'
     ? chooseRoute(anim.name, anim.lastRoutes)
     : anim.name === 'chick' ? ['2', 'office'] : fixedRoutes[anim.name];
@@ -44,8 +43,19 @@ function reset(anim: AnimatronicState) {
 }
 
 function defend(anim: AnimatronicState, state: GameState, message: string) {
-  Object.assign(anim, { mode: 'retreating', timer: retreatTime(state) });
+  resetAnimatronic(anim);
   Object.assign(state, { message, messageTime: 3 });
+}
+
+function damageWires(state: GameState) {
+  if (!state.rules.problems.outage.enabled) return;
+  state.problems.outageActive = true;
+  state.wiresFixed = [];
+  state.selectedWire = null;
+  state.computer = 'OFF';
+  state.leftDoor = { closed: false, moving: false, blocked: false };
+  state.rightDoor = { closed: false, moving: false, blocked: false };
+  Object.assign(state, { message: 'Цыплёнок повредил провода! Нужен ремонт.', messageTime: 5 });
 }
 
 function attackDoor(anim: AnimatronicState, state: GameState, dt: number) {
@@ -81,19 +91,12 @@ function attackWindow(anim: AnimatronicState, state: GameState, dt: number) {
 
 function advance(anim: AnimatronicState, state: GameState, dt: number) {
   if (anim.mode === 'retreating' || anim.mode === 'waiting') {
-    if ((anim.timer -= dt) <= 0) anim.mode === 'retreating' ? reset(anim) : anim.mode = 'moving';
+    if (anim.mode === 'retreating') resetAnimatronic(anim);
+    else if ((anim.timer -= dt) <= 0) anim.mode = 'moving';
     return;
   }
   if (anim.mode === 'office') {
-    if ((anim.timer -= dt) <= 0) {
-      if (state.rules.problems.outage.enabled) {
-        state.problems.outageActive = true;
-        state.wiresFixed = [];
-        state.selectedWire = null;
-        Object.assign(state, { message: 'Цыплёнок повредил провода! Нужен ремонт.', messageTime: 5 });
-      }
-      reset(anim);
-    }
+    if ((anim.timer -= dt) <= 0) resetAnimatronic(anim);
     return;
   }
   if (anim.mode === 'door') return attackDoor(anim, state, dt);
@@ -117,7 +120,10 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   anim.timer = 0;
   anim.routeIndex += 1;
   const spot = anim.route[anim.routeIndex];
-  if (spot === 'office') Object.assign(anim, { mode: 'office', timer: 6 });
+  if (spot === 'office') {
+    Object.assign(anim, { mode: 'office', timer: 6 });
+    damageWires(state);
+  }
   if (spot === 'run') {
     Object.assign(anim, { mode: 'running', timer: consumeRepairAttackTimer(anim, 3), arrival: state.elapsed });
     Object.values(state.animatronics).forEach((other) => {
@@ -141,7 +147,7 @@ export function stepAnimatronics(state: GameState, dt: number) {
     const anim = state.animatronics[name];
     const rule = state.rules.animatronics[name];
     if (anim.mode === 'hidden' && rule.enabled && state.elapsed >= rule.spawnTime) {
-      reset(anim);
+      resetAnimatronic(anim);
       Object.assign(state, { message: `${label(name)} появился на камере ${anim.route[0]}.`, messageTime: 3 });
     }
   });
