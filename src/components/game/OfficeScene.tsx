@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useState, type PointerEvent } from 'react';
 import type { GameState } from '../../game/types';
 import { DoorThreats, WindowThreat } from './ThreatSprites';
 
@@ -15,14 +15,20 @@ export function OfficeScene(props: Props) {
   const { state, onDrawer, onBox, onChick, onAim, onFlashlight } = props;
   const [pointer, setPointer] = useState({ x: 50, y: 42 });
   const anims = state.animatronics;
-  const moveLight = (event: MouseEvent<HTMLElement>) => {
+  const moveLight = (event: PointerEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width * 100;
     const y = (event.clientY - rect.top) / rect.height * 100;
     setPointer({ x, y });
     onAim(x > 27 && x < 73 && y > 14 && y < 67);
   };
-  return <main className="office" onMouseMove={moveLight}
+  const touchFlashlight = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType !== 'touch') return;
+    if ((event.target as HTMLElement).closest('button, [data-touch-ignore]')) return;
+    moveLight(event);
+    if (state.hasFlashlight) onFlashlight();
+  };
+  return <main className="office" onPointerMove={moveLight} onPointerUp={touchFlashlight}
     onContextMenu={(event) => { event.preventDefault(); if (state.hasFlashlight) onFlashlight(); }}>
     <div className="office-depth" aria-hidden="true">
       <div className="back-wall">
@@ -41,6 +47,8 @@ export function OfficeScene(props: Props) {
     <Door side="right" closed={state.rightDoor.closed} moving={state.rightDoor.moving} blocked={state.rightDoor.blocked} />
     <div className="door-control door-control--left"><i /><i /></div>
     <div className="door-control door-control--right"><i /><i /></div>
+    <div className="mobile-old-control-cover mobile-old-control-cover--left" aria-hidden="true" />
+    <div className="mobile-old-control-cover mobile-old-control-cover--right" aria-hidden="true" />
     <div className="window-frame">
       <div className="room-eight"><span className="room-eight__sign">ROOM 8</span><i /><i /><i /></div>
       <WindowThreat animatronics={anims} isLit={state.flashlightOn && state.flashlightAtWindow} />

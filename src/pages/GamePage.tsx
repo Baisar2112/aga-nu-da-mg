@@ -93,7 +93,7 @@ export function GamePage() {
     <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
     {!isPaused && !computerVisible && !state.repairOpen && !state.gameOver && !state.won &&
       <TouchControls onLeftDoor={() => game.toggleDoor('left')} onRightDoor={() => game.toggleDoor('right')}
-        onTablet={game.toggleTablet} onFlashlight={() => game.setFlashlight(!state.flashlightOn)}
+        onTablet={game.toggleTablet}
         onPause={() => { setIsPaused(true); setPauseSelection(0); }} />}
     {computerVisible && <ComputerScreen state={state} close={game.toggleTablet}
       selectCamera={(camera) => action((next) => { next.selectedCamera = camera; next.computer = 'CAMERA_VIEW'; })}

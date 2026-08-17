@@ -63,29 +63,56 @@
 }
 
 .touch-controls { display: none; }
-.touch-controls__group { display: flex; gap: clamp(8px, 2vw, 16px); }
-.touch-button {
-  display: grid;
-  min-width: clamp(58px, 14vw, 92px);
-  min-height: clamp(58px, 14vw, 92px);
-  place-content: center;
-  gap: 7px;
-  padding: 8px;
-  color: #e8e4d8;
-  border: 2px solid #6c716b;
-  border-radius: 8px;
-  background: #111512e6;
-  box-shadow: inset 0 0 0 3px #252b27, 0 4px 0 #030403;
+.touch-door-button {
+  width: 116px;
+  height: 116px;
+  padding: 12px;
+  border: 5px solid #050505;
+  border-radius: 12px;
+  background: #343734;
+  box-shadow: inset 0 0 0 4px #767b76, 0 6px 0 #050505;
 }
-.touch-button span { font-size: clamp(16px, 4vw, 25px); }
-.touch-button small { max-width: 72px; font-size: clamp(5px, 1.4vw, 8px); line-height: 1.4; }
-.touch-button:active { transform: translateY(3px); box-shadow: inset 0 0 0 3px #3f4a42; }
+.touch-door-button span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 5px solid #66120f;
+  border-radius: 50%;
+  background: #c82f27;
+  box-shadow: inset 9px 9px 0 #ed554c, inset -10px -10px 0 #7b1713, 0 0 14px #b32620;
+}
+.touch-door-button:active { transform: translateY(5px); box-shadow: inset 0 0 0 4px #767b76; }
+.touch-door-button:active span { background: #a8221c; box-shadow: inset 8px 8px 0 #6f1713; }
+
+.touch-tablet-button {
+  width: min(460px, 58vw);
+  height: 72px;
+  padding: 7px 20px;
+  color: #070807;
+  border: 5px solid #050505;
+  border-radius: 18px 18px 30% 30% / 18px 18px 20px 20px;
+  background: #b8bcb9;
+  box-shadow: inset 0 0 0 3px #e0e3e1, 0 5px 0 #050505;
+}
+.touch-tablet-button svg { width: 100%; height: 100%; overflow: visible; }
+.touch-tablet-button path { fill: none; stroke: currentColor; stroke-width: 5; stroke-linejoin: round; }
+.touch-tablet-button:active { transform: translateY(4px); background: #929793; box-shadow: inset 0 0 0 3px #c7cbc8; }
+
+.touch-pause-button {
+  width: 48px;
+  height: 42px;
+  color: #c7cbc8;
+  border: 3px solid #050505;
+  background: #262a27d9;
+  font-size: 13px;
+}
 
 @media (hover: none), (pointer: coarse) {
   .touch-controls { display: block; }
-  .controls-hint { display: none; }
+  .game-ui-layer .controls-hint { display: none; }
 }
 
-@media (orientation: portrait) and (hover: none), (orientation: portrait) and (pointer: coarse) {
-  .touch-controls__pause { top: 104px; }
+@media (max-height: 520px) and (hover: none), (max-height: 520px) and (pointer: coarse) {
+  .touch-door-button { width: 88px; height: 88px; padding: 9px; }
+  .touch-tablet-button { width: min(400px, 48vw); height: 58px; }
 }

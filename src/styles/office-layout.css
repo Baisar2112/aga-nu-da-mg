@@ -9,6 +9,8 @@
 .ceiling,
 .door-control { display: none; }
 
+.mobile-old-control-cover { display: none; }
+
 /* The slabs line up with the dark openings painted into the side walls. */
 .office-door {
   z-index: 4;
@@ -167,4 +169,21 @@
 .flashlight-beam {
   z-index: 10;
   background: radial-gradient(circle 220px at var(--light-x) var(--light-y), rgba(255, 248, 200, .42), rgba(255, 248, 200, .12) 48%, transparent 76%);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .mobile-old-control-cover {
+    position: absolute;
+    z-index: 12;
+    top: 44.5%;
+    display: block;
+    width: 2.2%;
+    height: 8.5%;
+    border: 4px solid #090b0a;
+    background: repeating-linear-gradient(0deg, #101310 0 8px, #080a09 8px 14px);
+    box-shadow: inset 0 0 0 3px #171b18;
+    pointer-events: none;
+  }
+  .mobile-old-control-cover--left { left: 5%; }
+  .mobile-old-control-cover--right { right: 5%; }
 }
