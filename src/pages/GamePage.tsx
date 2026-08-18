@@ -17,9 +17,20 @@ export function GamePage() {
   const [, navigate] = useLocation();
   const [isPaused, setIsPaused] = useState(false);
   const [pauseSelection, setPauseSelection] = useState(0);
-  const game = useGame(isPaused);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const game = useGame(isPaused, notesOpen);
   const { state, action } = game;
   useGameSounds(state, isPaused);
+  const computerVisible = ['WORKING', 'CAMERA_VIEW', 'REBOOTING'].includes(state.computer);
+
+  useEffect(() => {
+    if (!computerVisible) setNotesOpen(false);
+  }, [computerVisible]);
+
+  const toggleTablet = () => {
+    if (computerVisible) setNotesOpen(false);
+    game.toggleTablet();
+  };
 
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
@@ -41,24 +52,24 @@ export function GamePage() {
       }
       if (event.code === 'KeyA') game.toggleDoor('left');
       if (event.code === 'KeyD') game.toggleDoor('right');
-      if (event.code === 'Space') { event.preventDefault(); game.toggleTablet(); }
+      if (event.code === 'Space') { event.preventDefault(); toggleTablet(); }
     };
     window.addEventListener('keydown', keyDown);
     return () => window.removeEventListener('keydown', keyDown);
-  }, [game.toggleDoor, game.toggleTablet, isPaused, navigate, pauseSelection, state.gameOver, state.won]);
+  }, [computerVisible, game.toggleDoor, game.toggleTablet, isPaused, navigate, pauseSelection, state.gameOver, state.won]);
 
   const openDrawer = () => action((next) => {
-    next.drawerOpen = !next.drawerOpen;
-    if (next.drawerOpen && (!next.hasTape || !next.hasFlashlight)) {
+    if (next.drawerOpen) return;
+    next.drawerOpen = true;
+    if (!next.hasTape || !next.hasFlashlight) {
       next.hasTape = true;
       next.hasFlashlight = true;
       Object.assign(next, { message: 'Вы забрали фонарик и изоленту.', messageTime: 4 });
     }
   });
 
-  const selectWire = (wire: number, end: 'left' | 'right') => action((next) => {
-    if (end === 'left') next.selectedWire = wire;
-    else if (next.selectedWire === wire) {
+  const connectWire = (wire: number) => action((next) => {
+    if (!next.wiresFixed.includes(wire)) {
       next.wiresFixed.push(wire);
       next.selectedWire = null;
       if (next.wiresFixed.length === 3 && next.elapsed < FIRST_PHASE_SECONDS) {
@@ -70,10 +81,9 @@ export function GamePage() {
         next.repairOpen = false;
         Object.assign(next, { message: 'Электричество восстановлено!', messageTime: 4 });
       }
-    } else next.selectedWire = null;
+    }
   });
 
-  const computerVisible = ['WORKING', 'CAMERA_VIEW', 'REBOOTING'].includes(state.computer);
   const office = <OfficeScene state={state} onDrawer={openDrawer}
       onFlashlight={() => game.setFlashlight(!state.flashlightOn)}
       onAim={(atRoomEight) => action((next) => { next.flashlightAtWindow = atRoomEight; })}
@@ -93,12 +103,13 @@ export function GamePage() {
     <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
     {!isPaused && !computerVisible && !state.repairOpen && !state.gameOver && !state.won &&
       <TouchControls onLeftDoor={() => game.toggleDoor('left')} onRightDoor={() => game.toggleDoor('right')}
-        onTablet={game.toggleTablet}
+        onTablet={toggleTablet}
         onPause={() => { setIsPaused(true); setPauseSelection(0); }} />}
-    {computerVisible && <ComputerScreen state={state} close={game.toggleTablet}
+    {computerVisible && <ComputerScreen state={state} close={toggleTablet}
+      notesOpen={notesOpen} setNotesOpen={setNotesOpen}
       selectCamera={(camera) => action((next) => { next.selectedCamera = camera; next.computer = 'CAMERA_VIEW'; })}
       reboot={() => action((next) => { next.computer = 'REBOOTING'; next.rebootTime = 15; next.flashlightPulse = 0; })} />}
-    {state.repairOpen && <RepairPanel state={state} selectWire={selectWire} close={() => action((next) => { next.repairOpen = false; })} />}
+    {state.repairOpen && <RepairPanel state={state} connectWire={connectWire} close={() => action((next) => { next.repairOpen = false; })} />}
     {isPaused && <PauseMenu selected={pauseSelection} onSelect={setPauseSelection}
       onContinue={() => setIsPaused(false)} onExit={() => navigate('/')} />}
     {(state.gameOver || state.won) && <EndScreen won={state.won} reason={state.gameOver}

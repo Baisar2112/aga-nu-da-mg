@@ -1,7 +1,7 @@
 /* Generated pixel-art room with interactive game elements layered on top. */
 .office {
   isolation: isolate;
-  background: #050606 url('/images/security-office-background-v2.png') center / 100% 100% no-repeat;
+  background: #050606 url('/images/security-office-background-v3.png') center / 100% 100% no-repeat;
 }
 
 .office::before,
@@ -37,16 +37,17 @@
 .door-slab {
   border-bottom: 9px solid #080a09;
   background:
-    repeating-linear-gradient(90deg, transparent 0 30px, #626862 30px 33px),
-    repeating-linear-gradient(0deg, #454a46 0 28px, #202421 28px 34px);
+    repeating-linear-gradient(90deg, transparent 0 29px, #555 29px 33px),
+    repeating-linear-gradient(0deg, #090909 0 27px, #3d3d3d 27px 32px, #151515 32px 38px);
+  filter: grayscale(1) contrast(1.2);
 }
 
 .door-slab::before {
   position: absolute;
   inset: 8% 12%;
   content: '';
-  border: 5px solid #252925;
-  box-shadow: inset 0 0 0 3px #5b615b;
+  border: 5px solid #191919;
+  box-shadow: inset 0 0 0 3px #777;
 }
 
 .door-slab::after {
@@ -56,7 +57,7 @@
   left: 10%;
   height: 10px;
   content: '';
-  background: repeating-linear-gradient(90deg, #171a18 0 16px, #7c2529 16px 32px);
+  background: repeating-linear-gradient(90deg, #111 0 16px, #aaa 16px 32px);
 }
 
 /* The generated window stays visible; only enemies are drawn above its glass. */
@@ -97,73 +98,77 @@
 .desk-fan {
   position: absolute;
   z-index: 4;
-  top: -6%;
-  left: 55%;
-  width: 82px;
-  height: 82px;
-  border: 6px solid #111411;
+  top: -2%;
+  left: 40%;
+  width: 94px;
+  height: 88px;
+  border: 0;
+  background: transparent;
+}
+
+.desk-fan::before {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  content: '';
   background:
-    repeating-linear-gradient(0deg, transparent 0 5px, #252a26 5px 8px),
-    #414741;
-  box-shadow: inset 0 0 0 4px #60665f, 5px 5px 0 #090b09;
+    repeating-linear-gradient(90deg, transparent 0 17px, #343a35 17px 19px),
+    repeating-linear-gradient(0deg, transparent 0 17px, #343a35 17px 19px);
+  box-shadow: inset 0 0 0 5px #3d433e, inset 0 0 0 9px #171b18, 5px 5px 0 #080a09;
+  opacity: .72;
   clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
 }
 
 .desk-fan::after {
   position: absolute;
   z-index: 0;
-  bottom: -38px;
-  left: 31px;
-  width: 14px;
-  height: 38px;
+  bottom: -21px;
+  left: 29px;
+  width: 36px;
+  height: 24px;
   content: '';
-  background: #171a18;
-  box-shadow: -22px 33px 0 10px #111311;
+  background: #292e2a;
+  clip-path: polygon(38% 0, 62% 0, 68% 64%, 100% 64%, 100% 100%, 0 100%, 0 64%, 32% 64%);
+  box-shadow: 4px 4px 0 #080a09;
 }
 
-.desk-fan__rotor { position: absolute; z-index: 1; inset: 0; animation: fan-spin .2s steps(8) infinite; }
-.desk-fan__rotor i { position: absolute; top: 33px; left: 5px; width: 60px; height: 10px; background: #101310; transform-origin: center; }
+.desk-fan__rotor { position: absolute; z-index: 2; inset: 12px; animation: fan-spin .28s steps(8) infinite; }
+.desk-fan__rotor i { position: absolute; top: 28px; left: 3px; width: 66px; height: 12px; background: #555c56; transform-origin: center; clip-path: polygon(0 25%, 82% 0, 100% 50%, 82% 100%, 0 75%); }
 .desk-fan__rotor i:nth-child(2) { transform: rotate(60deg); }
 .desk-fan__rotor i:nth-child(3) { transform: rotate(120deg); }
-.desk-fan__rotor b { position: absolute; z-index: 2; top: 27px; left: 27px; width: 20px; height: 20px; background: #0b0d0c; }
+.desk-fan__rotor b { position: absolute; z-index: 4; top: 24px; left: 27px; width: 22px; height: 22px; border: 4px solid #555c56; background: #111512; }
 
 @keyframes fan-spin { to { transform: rotate(360deg); } }
 
 .drawer {
   z-index: 3;
   right: 1%;
-  top: 62%;
+  top: 70%;
   width: 22%;
-  height: 45%;
+  height: 17%;
   padding: 0;
-  color: #989b94;
-  border: 4px solid #111413;
-  background: #303430d9;
+  border: 0;
+  background: #92968d3e;
+  box-shadow: inset 0 0 9px #c4c8bc40;
 }
 
-.drawer::before {
-  position: absolute;
-  top: 14%;
-  right: 12%;
-  left: 12%;
-  height: 4px;
-  content: '';
-  background: #101210;
-}
-
-.drawer--open { transform: translateY(30%); background: #090b0a; border-top-width: 12px; }
-.drawer-inside { position: absolute; inset: 10px; display: flex; align-items: center; justify-content: center; gap: 18px; background: #050606; }
-.drawer-flashlight { width: 48px; height: 16px; background: #777; box-shadow: -10px 4px #aaa, 38px 4px #333; }
-.drawer-tape { width: 28px; height: 28px; border: 8px solid #7c2529; background: #050606; }
+.drawer:hover { background: #a2a69c56; }
+.drawer--open, .drawer--open:hover { background: transparent; box-shadow: none; cursor: default; }
 
 .fuse-box {
   z-index: 8;
-  left: 21.2%;
-  top: 52.8%;
-  width: 43px;
-  height: 57px;
-  opacity: .78;
+  left: 23.2%;
+  top: 55.2%;
+  width: 6.4%;
+  height: 10.6%;
+  border: 0;
+  background: #92968d38;
+  box-shadow: inset 0 0 8px #c4c8bc3e;
+  opacity: 1;
 }
+
+.fuse-box:not(:disabled):hover { background: #a2a69c56; }
+.fuse-box:disabled { cursor: default; }
 
 .chick { left: 18%; bottom: 24%; z-index: 9; }
 .flashlight-beam {

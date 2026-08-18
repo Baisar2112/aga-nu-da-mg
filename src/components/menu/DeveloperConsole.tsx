@@ -47,6 +47,7 @@ export function DeveloperConsole({ close }: { close: () => void }) {
   const save = (event: FormEvent) => {
     event.preventDefault();
     const normalized = structuredClone(rules);
+    normalized.officeBrightness = clamp(normalized.officeBrightness, 0, 100);
     ANIMATRONIC_NAMES.forEach((name) => {
       normalized.animatronics[name].spawnTime = clamp(normalized.animatronics[name].spawnTime, 0, NIGHT_SECONDS);
       normalized.animatronics[name].speed = clamp(normalized.animatronics[name].speed, .1, 5);
@@ -73,6 +74,12 @@ export function DeveloperConsole({ close }: { close: () => void }) {
     <form className="developer-console" onSubmit={save}>
       <header><div><small>SYSTEM OVERRIDE</small><h2>КОНСОЛЬ РАЗРАБОТЧИКА</h2></div>
         <button className="developer-close" type="button" onClick={close}>×</button></header>
+      <section className="developer-brightness">
+        <label htmlFor="office-brightness"><span>ЯРКОСТЬ ОФИСА</span><strong>{Math.round(rules.officeBrightness)}%</strong></label>
+        <input id="office-brightness" type="range" min="0" max="100" step="5"
+          value={rules.officeBrightness}
+          onChange={(event) => setRules((current) => ({ ...current, officeBrightness: Number(event.target.value) }))} />
+      </section>
       <section><h3>АНИМАТРОНИКИ</h3>
         {ANIMATRONIC_NAMES.map((name) => <div className="developer-row" key={name}>
           <label><input type="checkbox" checked={rules.animatronics[name].enabled}
@@ -91,7 +98,7 @@ export function DeveloperConsole({ close }: { close: () => void }) {
             change={(at) => updateProblem(name, { at })} />
         </div>)}
       </section>
-      <p className="developer-note">Настройки применятся после запуска новой игры.</p>
+      <p className="developer-note">Настройки применятся только к одной следующей новой игре.</p>
       <footer><button type="button" onClick={() => { clearDeveloperConfig(); setRules(createConsoleDefaults()); }}>СБРОСИТЬ</button>
         <button type="submit">СОХРАНИТЬ</button></footer>
     </form>

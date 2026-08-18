@@ -1,18 +1,19 @@
 import { BASE_SPEED } from './constants';
+import { createFoxCooldown, FOX_ROUTE, stepFox } from './fox';
 import { applyRepairGate, consumeRepairAttackTimer, isHeldByRepair, shouldWaitBeforeDoor } from './repairGate';
 import { applyThreatDirector } from './threatDirector';
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
 const fixedRoutes = {
-  crocodile: ['7', '2', '1', 'left'],
-  fox: ['7', '3', '5', '6', 'run'],
+  crocodile: ['1', '2', '7', 'left'],
+  fox: FOX_ROUTE,
 };
 
 const routeCooldown = () => Math.floor(Math.random() * 13) + 5;
 
 function chooseRoute(name: 'dog' | 'freddy', previous: string[]) {
   if (name === 'dog') {
-    return Math.random() < 0.5 ? ['7', '3', '5', '6', 'right'] : ['7', '3', '5', '8', 'window'];
+    return Math.random() < 0.5 ? ['1', '3', '5', '6', 'right'] : ['1', '3', '5', '8', 'window'];
   }
   const options = [
     ['4', '3', '5', '6', 'right'],
@@ -35,7 +36,7 @@ export function resetAnimatronic(anim: AnimatronicState) {
     route,
     routeIndex: 0,
     mode: 'waiting',
-    timer: routeCooldown(),
+    timer: anim.name === 'fox' ? createFoxCooldown() : routeCooldown(),
     litTime: 0,
     heldByDirector: false,
     heldByRepair: false,
@@ -90,6 +91,7 @@ function attackWindow(anim: AnimatronicState, state: GameState, dt: number) {
 }
 
 function advance(anim: AnimatronicState, state: GameState, dt: number) {
+  if (anim.name === 'fox') return stepFox(anim, state, dt, (message) => defend(anim, state, message));
   if (anim.mode === 'retreating' || anim.mode === 'waiting') {
     if (anim.mode === 'retreating') resetAnimatronic(anim);
     else if ((anim.timer -= dt) <= 0) anim.mode = 'moving';
@@ -101,13 +103,6 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   }
   if (anim.mode === 'door') return attackDoor(anim, state, dt);
   if (anim.mode === 'window') return attackWindow(anim, state, dt);
-  if (anim.mode === 'running') {
-    if ((anim.timer -= dt) <= 0) {
-      if (state.rightDoor.closed && !state.rightDoor.moving) defend(anim, state, 'Лиса с грохотом ударилась о дверь.');
-      else state.gameOver = 'Лиса ворвалась в офис.';
-    }
-    return;
-  }
   const multiplier = (state.problems.rageActive ? 1.5 : 1) / (state.computer === 'REBOOTING' ? 1.5 : 1);
   anim.timer += dt;
   const movementTime = 15 / ((state.rules.animatronics[anim.name]?.speed ?? BASE_SPEED[anim.name]) * multiplier);
@@ -123,13 +118,6 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   if (spot === 'office') {
     Object.assign(anim, { mode: 'office', timer: 6 });
     damageWires(state);
-  }
-  if (spot === 'run') {
-    Object.assign(anim, { mode: 'running', timer: consumeRepairAttackTimer(anim, 3), arrival: state.elapsed });
-    Object.values(state.animatronics).forEach((other) => {
-      if (other.name !== 'fox' && other.name !== 'chick' && other.mode === 'moving') other.timer = Math.max(0, other.timer - 2);
-    });
-    Object.assign(state, { message: 'Быстрый топот справа!', messageTime: 3 });
   }
   if (spot === 'left' || spot === 'right') {
     const normalTimer = anim.name === 'crocodile' ? 9 : anim.name === 'freddy' ? (spot === 'left' ? 1 : 1.5) : 5;
@@ -155,7 +143,7 @@ export function stepAnimatronics(state: GameState, dt: number) {
   applyRepairGate(state);
   const released = applyThreatDirector(state);
   if (released) Object.assign(state, {
-    message: `${label(released)} атакует через 1 секунду!`,
+    message: `${label(released)} продолжает атаку!`,
     messageTime: 1,
   });
 

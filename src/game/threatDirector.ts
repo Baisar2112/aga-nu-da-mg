@@ -1,13 +1,19 @@
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
-const RESPONSE_SECONDS = 1;
 const DANGEROUS_MODES = new Set<AnimatronicState['mode']>(['door', 'window', 'running']);
 
-/** Pauses later threats and gives each one second when it becomes first in line. */
+const isThreat = (anim: AnimatronicState) => DANGEROUS_MODES.has(anim.mode)
+  || (anim.name === 'fox' && anim.mode === 'moving');
+
+/** Pauses later threats without changing their remaining attack time. */
 export function applyThreatDirector(state: GameState): AnimatronicName | null {
   const threats = Object.values(state.animatronics)
-    .filter((anim) => DANGEROUS_MODES.has(anim.mode))
-    .sort((first, second) => first.arrival - second.arrival);
+    .filter(isThreat)
+    .sort((first, second) => {
+      if (first.name === 'fox') return -1;
+      if (second.name === 'fox') return 1;
+      return first.arrival - second.arrival;
+    });
 
   let released: AnimatronicName | null = null;
   threats.forEach((anim, index) => {
@@ -17,7 +23,6 @@ export function applyThreatDirector(state: GameState): AnimatronicName | null {
     }
     if (anim.heldByDirector) {
       anim.heldByDirector = false;
-      anim.timer = RESPONSE_SECONDS;
       released = anim.name;
     }
   });

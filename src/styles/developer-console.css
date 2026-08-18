@@ -13,6 +13,10 @@
 .developer-console > header { display: flex; align-items: start; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 4px solid #333; }
 .developer-console h2 { margin-top: 8px; font-size: clamp(17px, 2vw, 28px); }.developer-console h3 { margin: 22px 0 10px; color: #999; font-size: 13px; }
 .developer-console .developer-close { flex: 0 0 42px; height: 42px; }
+.developer-brightness { margin-top: 20px; padding: 16px; border: 2px solid #292e2a; background: #101311; }
+.developer-brightness label { display: flex; justify-content: space-between; color: #aaa; font-size: 11px; }
+.developer-brightness strong { color: #d2a75f; }
+.developer-brightness input { width: 100%; margin-top: 16px; accent-color: #d2a75f; cursor: pointer; }
 .developer-row { display: grid; grid-template-columns: minmax(150px, 1fr) 180px 150px; align-items: end; gap: 14px; padding: 10px 12px; border-bottom: 2px solid #222; background: #101311; }
 .developer-row--problem { grid-template-columns: minmax(220px, 1fr) 180px; }
 .developer-row > label:first-child { align-self: center; font-size: 11px; line-height: 1.5; }.developer-row input[type='checkbox'] { width: 18px; height: 18px; accent-color: #a20d0d; }

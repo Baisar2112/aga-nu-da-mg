@@ -1,6 +1,5 @@
 import type { GameState } from '../game/types';
-import { clockMinutesToElapsed, createInitialState, FIRST_PHASE_SECONDS } from '../game/constants';
-import { loadDeveloperConfig } from './developerConfig';
+import { clockMinutesToElapsed, createInitialState, FIRST_PHASE_SECONDS, NIGHT_SECONDS } from '../game/constants';
 
 const SAVE_KEY = 'last-night-at-freddy.phase-save.v1';
 const COMPLETED_KEY = 'last-night-at-freddy.completed.v1';
@@ -18,11 +17,12 @@ export function loadCheckpoint(): GameState | null {
   if (!raw) return null;
   try {
     const saved = JSON.parse(raw) as GameState;
-    const fallback = createInitialState(loadDeveloperConfig() ?? undefined);
+    const fallback = createInitialState();
     saved.rules ??= structuredClone(fallback.rules);
-    if (saved.timeLayoutVersion !== 2) {
-      if (saved.elapsed === 0) return fallback;
-      migrateLegacyGameTime(saved);
+    saved.rules.officeBrightness ??= fallback.rules.officeBrightness;
+    if (saved.timeLayoutVersion !== 3) {
+      if (saved.timeLayoutVersion !== 2) migrateVersionOneTime(saved);
+      migrateVersionTwoTime(saved);
     }
     if (saved.cameraLayoutVersion !== 2) {
       saved.selectedCamera = swapCameraOneAndSeven(saved.selectedCamera);
@@ -45,19 +45,46 @@ export function loadCheckpoint(): GameState | null {
   }
 }
 
-function migrateLegacyGameTime(state: GameState) {
-  const convert = (seconds: number) => clockMinutesToElapsed(seconds * 360 / 480);
-  const convertTimestamp = (seconds: number) => seconds >= 900 ? seconds : convert(seconds);
+const VERSION_TWO_NIGHT_SECONDS = 510;
+const VERSION_TWO_START_MINUTES = 23 * 60 + 30;
+const VERSION_TWO_GAME_MINUTES = 390;
+
+function migrateVersionOneTime(state: GameState) {
+  const convert = (seconds: number) => clockToVersionTwoElapsed(seconds * 360 / 480);
+  convertGameTimestamps(state, convert);
   state.elapsed = convert(state.elapsed);
-  Object.values(state.rules.animatronics).forEach((rule) => { rule.spawnTime = convert(rule.spawnTime); });
-  Object.values(state.rules.problems).forEach((rule) => { rule.at = convert(rule.at); });
-  state.problems.outageAt = convertTimestamp(state.problems.outageAt);
-  state.problems.staticAt = convertTimestamp(state.problems.staticAt);
-  state.problems.rageAt = convertTimestamp(state.problems.rageAt);
   Object.values(state.animatronics).forEach((animatronic) => {
     if (animatronic.arrival > 0) animatronic.arrival = convert(animatronic.arrival);
   });
   state.timeLayoutVersion = 2;
+}
+
+function migrateVersionTwoTime(state: GameState) {
+  const convert = (seconds: number) => {
+    const clockMinutes = (VERSION_TWO_START_MINUTES
+      + seconds * VERSION_TWO_GAME_MINUTES / VERSION_TWO_NIGHT_SECONDS) % (24 * 60);
+    return clockMinutesToElapsed(clockMinutes);
+  };
+  convertGameTimestamps(state, convert);
+  state.elapsed = state.elapsed * NIGHT_SECONDS / VERSION_TWO_NIGHT_SECONDS;
+  Object.values(state.animatronics).forEach((animatronic) => {
+    if (animatronic.arrival > 0) animatronic.arrival *= NIGHT_SECONDS / VERSION_TWO_NIGHT_SECONDS;
+  });
+  state.timeLayoutVersion = 3;
+}
+
+function convertGameTimestamps(state: GameState, convert: (seconds: number) => number) {
+  const timestamp = (seconds: number) => seconds >= 900 ? seconds : convert(seconds);
+  Object.values(state.rules.animatronics).forEach((rule) => { rule.spawnTime = convert(rule.spawnTime); });
+  Object.values(state.rules.problems).forEach((rule) => { rule.at = convert(rule.at); });
+  state.problems.outageAt = timestamp(state.problems.outageAt);
+  state.problems.staticAt = timestamp(state.problems.staticAt);
+  state.problems.rageAt = timestamp(state.problems.rageAt);
+}
+
+function clockToVersionTwoElapsed(clockMinutes: number) {
+  const minutesFromStart = (clockMinutes - VERSION_TWO_START_MINUTES + 24 * 60) % (24 * 60);
+  return minutesFromStart * VERSION_TWO_NIGHT_SECONDS / VERSION_TWO_GAME_MINUTES;
 }
 
 function swapCameraOneAndSeven<T extends number | string>(camera: T): T {

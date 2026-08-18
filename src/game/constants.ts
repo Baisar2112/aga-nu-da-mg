@@ -1,14 +1,17 @@
 import type { AnimatronicName, GameRules, GameState } from './types';
 
-export const NIGHT_SECONDS = 510;
-export const GAME_START_MINUTES = 23 * 60 + 30;
-export const GAME_MINUTES = 390;
+export const NIGHT_SECONDS = 480;
+export const GAME_START_MINUTES = 23 * 60 + 50;
+export const GAME_MINUTES = 370;
 export const FIRST_PHASE_SECONDS = NIGHT_SECONDS / 3;
+export const DEFAULT_OFFICE_BRIGHTNESS = 40;
 
 export function clockMinutesToElapsed(clockMinutes: number) {
   const minutesFromStart = (clockMinutes - GAME_START_MINUTES + 24 * 60) % (24 * 60);
   return minutesFromStart * NIGHT_SECONDS / GAME_MINUTES;
 }
+
+export const GUARD_NOTE_SLOWDOWN_END = clockMinutesToElapsed(10);
 
 export const SPAWN_TIMES: Record<AnimatronicName, number> = {
   crocodile: clockMinutesToElapsed(15),
@@ -45,7 +48,7 @@ export function createInitialState(customRules?: GameRules): GameState {
   const rules = customRules ? structuredClone(customRules) : createDefaultRules();
   return {
     elapsed: 0,
-    timeLayoutVersion: 2,
+    timeLayoutVersion: 3,
     energy: 100,
     flashlightBattery: 100,
     hasFlashlight: false,
@@ -91,6 +94,7 @@ export function createInitialState(customRules?: GameRules): GameState {
 
 function createDefaultRules(): GameRules {
   return {
+    officeBrightness: DEFAULT_OFFICE_BRIGHTNESS,
     animatronics: {
       crocodile: { enabled: true, spawnTime: SPAWN_TIMES.crocodile, speed: BASE_SPEED.crocodile },
       dog: { enabled: true, spawnTime: SPAWN_TIMES.dog, speed: BASE_SPEED.dog },

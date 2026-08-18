@@ -45,6 +45,7 @@ export interface ProblemRule {
 }
 
 export interface GameRules {
+  officeBrightness: number;
   animatronics: Record<AnimatronicName, AnimatronicRule>;
   problems: Record<'outage' | 'static' | 'rage', ProblemRule>;
 }

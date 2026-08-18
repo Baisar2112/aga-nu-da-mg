@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createInitialState } from './constants';
+import { createInitialState, GUARD_NOTE_SLOWDOWN_END } from './constants';
 import { stepGame } from './stepGame';
 import type { DoorSide, GameState } from './types';
 import { clearGameSave, loadCheckpoint, markCompleted, PHASE_LENGTH, saveCheckpoint } from '../lib/gameSave';
-import { loadDeveloperConfig } from '../lib/developerConfig';
+import { consumeDeveloperConfig } from '../lib/developerConfig';
 
-const createConfiguredState = () => createInitialState(loadDeveloperConfig() ?? undefined);
+const createConfiguredState = () => {
+  const rules = consumeDeveloperConfig();
+  const initialState = createInitialState(rules ?? undefined);
+  if (rules) saveCheckpoint(initialState);
+  return initialState;
+};
 
-export function useGame(isPaused = false) {
+export function useGame(isPaused = false, isReadingGuardNote = false) {
   const [state, setState] = useState(() => loadCheckpoint() ?? createConfiguredState());
   const lastTick = useRef(performance.now());
   const paused = useRef(isPaused);
+  const readingGuardNote = useRef(isReadingGuardNote);
   const savedPhase = useRef(Math.floor(state.elapsed / PHASE_LENGTH));
 
   useEffect(() => {
@@ -28,8 +34,9 @@ export function useGame(isPaused = false) {
 
   useEffect(() => {
     paused.current = isPaused;
+    readingGuardNote.current = isReadingGuardNote;
     lastTick.current = performance.now();
-  }, [isPaused]);
+  }, [isPaused, isReadingGuardNote]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -38,9 +45,14 @@ export function useGame(isPaused = false) {
         lastTick.current = now;
         return;
       }
-      const dt = Math.min(0.25, (now - lastTick.current) / 1000);
+      const realDt = Math.min(0.25, (now - lastTick.current) / 1000);
       lastTick.current = now;
-      setState((current) => stepGame(current, dt));
+      setState((current) => {
+        const canSlowTime = current.computer === 'CAMERA_VIEW'
+          && current.elapsed < GUARD_NOTE_SLOWDOWN_END;
+        const gameDt = readingGuardNote.current && canSlowTime ? realDt / 2 : realDt;
+        return stepGame(current, gameDt);
+      });
     }, 100);
     return () => window.clearInterval(timer);
   }, []);

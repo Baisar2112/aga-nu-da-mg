@@ -1,4 +1,5 @@
 import { useState, type PointerEvent } from 'react';
+import { DEFAULT_OFFICE_BRIGHTNESS } from '../../game/constants';
 import type { GameState } from '../../game/types';
 import { DoorThreats, WindowThreat } from './ThreatSprites';
 
@@ -28,7 +29,10 @@ export function OfficeScene(props: Props) {
     moveLight(event);
     if (state.hasFlashlight) onFlashlight();
   };
-  return <main className="office" onPointerMove={moveLight} onPointerUp={touchFlashlight}
+  const officeClass = `office${state.problems.outageActive ? ' office--power-outage' : ''}`;
+  const brightness = .4 + (state.rules.officeBrightness ?? DEFAULT_OFFICE_BRIGHTNESS) * .015;
+  const officeStyle = { '--office-brightness': brightness } as React.CSSProperties;
+  return <main className={officeClass} style={officeStyle} onPointerMove={moveLight} onPointerUp={touchFlashlight}
     onContextMenu={(event) => { event.preventDefault(); if (state.hasFlashlight) onFlashlight(); }}>
     <div className="office-depth" aria-hidden="true">
       <div className="back-wall">
@@ -55,7 +59,8 @@ export function OfficeScene(props: Props) {
     </div>
     <DoorThreats animatronics={anims} leftIsLit={state.flashlightOn && !state.flashlightAtWindow} />
     <button className={`chick ${anims.chick.mode === 'office' ? 'chick--present' : ''} ${anims.chick.mode === 'office' && state.flashlightOn ? 'chick--lit' : ''}`} onClick={onChick} aria-label="Прогнать Чика"><i>●</i><i>●</i><b>▲</b></button>
-    <button className="fuse-box" onClick={onBox}><span>⚡</span><small>ЩИТОК</small></button>
+    <button className="fuse-box" onClick={onBox} disabled={!state.problems.outageActive}
+      aria-label="Электрощиток" />
     <div className="desk">
       <div className="desk-papers"><i /><i /></div>
       <div className="desk-cup"><i /></div>
@@ -66,10 +71,8 @@ export function OfficeScene(props: Props) {
       <div className="desk-fan" aria-label="Работающий настольный вентилятор">
         <div className="desk-fan__rotor"><i /><i /><i /><b /></div>
       </div>
-      <button className={`drawer ${state.drawerOpen ? 'drawer--open' : ''}`} onClick={onDrawer}>
-        <span>ТУМБА</span>
-        {state.drawerOpen && <i className="drawer-inside">{!state.hasFlashlight && <b className="drawer-flashlight" />}{!state.hasTape && <b className="drawer-tape" />}</i>}
-      </button>
+      <button className={`drawer ${state.drawerOpen ? 'drawer--open' : ''}`} onClick={onDrawer}
+        disabled={state.drawerOpen} aria-label="Открыть верхний правый ящик" />
     </div>
     {state.flashlightOn && <div className="flashlight-beam" style={{ '--light-x': `${pointer.x}%`, '--light-y': `${pointer.y}%` } as React.CSSProperties} />}
   </main>;

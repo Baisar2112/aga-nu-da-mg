@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { playHeavySteps, playMetalHit, playWarning } from './gameAudio';
+import { playGlassKnock, playHeavySteps, playMetalHit, playPowerFailure, playWarning } from './gameAudio';
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
 type AnimSnapshot = Record<AnimatronicName, Pick<AnimatronicState, 'mode' | 'routeIndex'>>;
@@ -18,7 +18,11 @@ export function useGameSounds(state: GameState, isPaused = false) {
   const doorThreatActive = useRef(false);
   const previousMessage = useRef('');
   const previousAnims = useRef(snapshot(state));
+  const previousOutage = useRef(state.problems.outageActive);
   const paused = useRef(isPaused);
+  const dogAtDarkWindow = !state.gameOver && !state.won
+    && state.animatronics.dog.mode === 'window'
+    && !(state.flashlightOn && state.flashlightAtWindow);
 
   useEffect(() => {
     paused.current = isPaused;
@@ -73,6 +77,30 @@ export function useGameSounds(state: GameState, isPaused = false) {
   }, []);
 
   useEffect(() => {
+    if (isPaused || !dogAtDarkWindow) return;
+    let output: GainNode | null = null;
+    const knock = () => {
+      const context = audio.current;
+      if (!context || context.state !== 'running') return;
+      if (!output) {
+        output = context.createGain();
+        output.gain.value = .75;
+        output.connect(context.destination);
+      }
+      playGlassKnock(context, output);
+    };
+    knock();
+    const timer = window.setInterval(knock, 950);
+    return () => {
+      window.clearInterval(timer);
+      if (!output) return;
+      const context = audio.current;
+      if (context) output.gain.setValueAtTime(0, context.currentTime);
+      output.disconnect();
+    };
+  }, [dogAtDarkWindow, isPaused]);
+
+  useEffect(() => {
     if (isPaused) return;
     const context = audio.current;
     doorThreatActive.current = !state.gameOver && !state.won
@@ -95,6 +123,10 @@ export function useGameSounds(state: GameState, isPaused = false) {
       if (context && changedCamera) playHeavySteps(context);
     });
     previousAnims.current = snapshot(state);
+
+    const outageStarted = state.problems.outageActive && !previousOutage.current;
+    previousOutage.current = state.problems.outageActive;
+    if (context && outageStarted) playPowerFailure(context);
 
     if (!state.message || state.message === previousMessage.current || !context) return;
     previousMessage.current = state.message;

@@ -1,0 +1,19 @@
+.repair-panel { width: min(92%, 760px); touch-action: none; }
+.repair-panel > p { line-height: 1.6; }
+.wire-board { display: block; width: 100%; margin: 22px 0 14px; overflow: visible; touch-action: none; }
+.wire-board__case { fill: #0c100e; stroke: #59615b; stroke-width: 10; }
+.wire-half { cursor: grab; }
+.wire-half:active { cursor: grabbing; }
+.wire-half path, .joined-wire > path { fill: none; stroke-linecap: square; }
+.wire-half path, .joined-wire > path { filter: drop-shadow(0 0 5px var(--wire)); }
+.wire-half path { stroke: var(--wire); stroke-width: 13; }
+.wire-half circle { fill: transparent; stroke: var(--wire); stroke-width: 5; stroke-dasharray: 7 8; }
+.joined-wire > path { stroke: var(--wire); stroke-width: 15; }
+.wire-tape { fill: #1769c2; stroke: #082d61; stroke-width: 6; }
+.wire-tape__stripe { fill: none; stroke: #75aef0; stroke-width: 5; opacity: .55; }
+.dragged-wire { fill: none; stroke: var(--wire); stroke-width: 14; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--wire)); pointer-events: none; }
+.repair-progress { display: block; color: #dfaa58; text-align: center; }
+
+@media (max-height: 600px) {
+  .wire-board { height: min(57vh, 350px); margin: 10px 0; }
+}

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { GameState } from '../../game/types';
 import { CameraMap } from './CameraMap';
 import { GuardNote } from './GuardNote';
@@ -9,10 +8,11 @@ interface Props {
   selectCamera: (camera: number) => void;
   reboot: () => void;
   close: () => void;
+  notesOpen: boolean;
+  setNotesOpen: (open: boolean) => void;
 }
 
-export function ComputerScreen({ state, selectCamera, reboot, close }: Props) {
-  const [notesOpen, setNotesOpen] = useState(false);
+export function ComputerScreen({ state, selectCamera, reboot, close, notesOpen, setNotesOpen }: Props) {
   const movementDetected = Object.values(state.animatronics).some((animatronic) => {
     const isOnCamera = animatronic.mode === 'waiting' || animatronic.mode === 'moving';
     if (isOnCamera && Number(animatronic.route[animatronic.routeIndex]) === state.selectedCamera) return true;

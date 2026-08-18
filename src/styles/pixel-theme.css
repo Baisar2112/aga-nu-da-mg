@@ -26,6 +26,25 @@
   filter: contrast(1.12) saturate(.55);
 }
 
+.office { filter: contrast(1.12) saturate(.55) brightness(var(--office-brightness, 1)); }
+
+.office.office--power-outage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  content: '';
+  pointer-events: none;
+  background: #000;
+  animation: power-outage-flicker 1.6s steps(1) forwards;
+}
+
+@keyframes power-outage-flicker {
+  0%, 18%, 40% { opacity: 0; }
+  9%, 29%, 52% { opacity: .8; }
+  62% { opacity: .3; }
+  72%, 100% { opacity: .52; }
+}
+
 .door-slab,
 .chick,
 .drawer,
