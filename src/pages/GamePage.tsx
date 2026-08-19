@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { ComputerScreen } from '../components/game/ComputerScreen';
 import { EndScreen } from '../components/game/EndScreen';
 import { GameHud } from '../components/game/GameHud';
+import { Jumpscare, jumpscareImages } from '../components/game/Jumpscare';
 import { OfficeScene } from '../components/game/OfficeScene';
 import { PauseMenu } from '../components/game/PauseMenu';
 import { RepairPanel } from '../components/game/RepairPanel';
@@ -22,6 +23,10 @@ export function GamePage() {
   const { state, action } = game;
   useGameSounds(state, isPaused);
   const computerVisible = ['WORKING', 'CAMERA_VIEW', 'REBOOTING'].includes(state.computer);
+
+  useEffect(() => {
+    jumpscareImages.forEach((src) => { new Image().src = src; });
+  }, []);
 
   useEffect(() => {
     if (!computerVisible) setNotesOpen(false);
@@ -115,5 +120,6 @@ export function GamePage() {
       onContinue={() => setIsPaused(false)} onExit={() => navigate('/')} />}
     {(state.gameOver || state.won) && <EndScreen won={state.won} reason={state.gameOver}
       restart={game.restart} openMenu={() => navigate('/')} />}
+    {state.gameOver && <Jumpscare reason={state.gameOver} />}
   </VirtualViewport>;
 }
