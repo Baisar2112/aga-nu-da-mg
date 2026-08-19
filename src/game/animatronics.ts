@@ -98,7 +98,10 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
     return;
   }
   if (anim.mode === 'office') {
-    if ((anim.timer -= dt) <= 0) resetAnimatronic(anim);
+    if ((anim.timer -= dt) <= 0) {
+      damageWires(state);
+      resetAnimatronic(anim);
+    }
     return;
   }
   if (anim.mode === 'door') return attackDoor(anim, state, dt);
@@ -116,8 +119,8 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   anim.routeIndex += 1;
   const spot = anim.route[anim.routeIndex];
   if (spot === 'office') {
-    Object.assign(anim, { mode: 'office', timer: 6 });
-    damageWires(state);
+    Object.assign(anim, { mode: 'office', timer: 5 });
+    Object.assign(state, { message: 'Цыплёнок тянется к щитку — прогоните его!', messageTime: 5 });
   }
   if (spot === 'left' || spot === 'right') {
     const normalTimer = anim.name === 'crocodile' ? 9 : anim.name === 'freddy' ? (spot === 'left' ? 1 : 1.5) : 5;

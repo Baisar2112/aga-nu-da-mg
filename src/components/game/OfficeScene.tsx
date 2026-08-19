@@ -60,7 +60,10 @@ export function OfficeScene(props: Props) {
       <WindowThreat animatronics={anims} isLit={state.flashlightOn && state.flashlightAtWindow} />
     </div>
     <DoorThreats animatronics={anims} leftIsLit={state.flashlightOn && !state.flashlightAtWindow} />
-    <button className={`chick ${anims.chick.mode === 'office' ? 'chick--present' : ''} ${anims.chick.mode === 'office' && state.flashlightOn ? 'chick--lit' : ''}`} onClick={onChick} aria-label="Прогнать Чика"><i>●</i><i>●</i><b>▲</b></button>
+    <button className={`chick ${anims.chick.mode === 'office' ? 'chick--present' : ''} ${anims.chick.mode === 'office' && state.flashlightOn ? 'chick--lit' : ''}`}
+      onClick={onChick} aria-label="Прогнать Цыплёнка">
+      <img src="/images/chick-fuse-box.png" alt="" aria-hidden="true" />
+    </button>
     <button className="fuse-box" onClick={onBox} disabled={!state.problems.outageActive}
       aria-label="Электрощиток" />
     <div className="desk">

@@ -66,8 +66,14 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
       const next = structuredClone(current);
       const door = side === 'left' ? next.leftDoor : next.rightDoor;
       door.moving = true;
-      if (!door.closed && other.closed) door.blocked = true;
-      else door.closed = !door.closed;
+      if (door.blocked) {
+        door.blocked = false;
+        door.closed = true;
+      } else if (!door.closed && other.closed) {
+        door.blocked = true;
+      } else {
+        door.closed = !door.closed;
+      }
       return next;
     });
     let remaining = 100;
@@ -84,16 +90,7 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
         const next = structuredClone(current);
         const door = side === 'left' ? next.leftDoor : next.rightDoor;
         if (!door.moving) return current;
-        if (door.blocked) {
-          door.blocked = false;
-          window.setTimeout(() => setState((latest) => {
-            const finished = structuredClone(latest);
-            const returningDoor = side === 'left' ? finished.leftDoor : finished.rightDoor;
-            if (!returningDoor.moving || returningDoor.blocked) return latest;
-            returningDoor.moving = false;
-            return finished;
-          }), 100);
-        } else door.moving = false;
+        door.moving = false;
         return next;
       });
     };

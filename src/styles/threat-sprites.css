@@ -21,7 +21,16 @@
 }
 
 .threat-sprite--window.is-lit { opacity: .96; }
-.threat-sprite--freddy-window { left: 9%; width: 82%; }
+.threat-sprite--freddy-window {
+  left: 9%;
+  width: 82%;
+  opacity: .58;
+  filter: brightness(.5) contrast(1.14) saturate(.5);
+}
+
+.threat-sprite--freddy-window.is-lit {
+  filter: brightness(.95) contrast(1.12) saturate(.65);
+}
 
 .door-threat-slot {
   position: absolute;

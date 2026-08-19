@@ -15,6 +15,8 @@ export function useGameSounds(state: GameState, isPaused = false) {
   const audio = useRef<AudioContext | null>(null);
   const fanAudio = useRef<HTMLAudioElement | null>(null);
   const doorLoop = useRef<HTMLAudioElement | null>(null);
+  const freddyLaugh = useRef<HTMLAudioElement | null>(null);
+  const freddySlowLaugh = useRef<HTMLAudioElement | null>(null);
   const doorThreatActive = useRef(false);
   const previousMessage = useRef('');
   const previousAnims = useRef(snapshot(state));
@@ -30,6 +32,8 @@ export function useGameSounds(state: GameState, isPaused = false) {
     if (isPaused) {
       fanAudio.current?.pause();
       doorLoop.current?.pause();
+      freddyLaugh.current?.pause();
+      freddySlowLaugh.current?.pause();
       if (context?.state === 'running') void context.suspend();
       return;
     }
@@ -60,6 +64,14 @@ export function useGameSounds(state: GameState, isPaused = false) {
     doorLoop.current.preload = 'auto';
     doorLoop.current.loop = true;
     doorLoop.current.volume = .8;
+    freddyLaugh.current = new Audio('/audio/freddy-laugh.mp3');
+    freddyLaugh.current.preload = 'auto';
+    freddyLaugh.current.volume = .85;
+    freddySlowLaugh.current = new Audio('/audio/freddy-laugh.mp3');
+    freddySlowLaugh.current.preload = 'auto';
+    freddySlowLaugh.current.playbackRate = 2 / 3;
+    freddySlowLaugh.current.preservesPitch = false;
+    freddySlowLaugh.current.volume = .85;
     startAudio();
     window.addEventListener('pointerdown', startAudio);
     window.addEventListener('keydown', startAudio);
@@ -68,10 +80,14 @@ export function useGameSounds(state: GameState, isPaused = false) {
       window.removeEventListener('keydown', startAudio);
       fanAudio.current?.pause();
       doorLoop.current?.pause();
+      freddyLaugh.current?.pause();
+      freddySlowLaugh.current?.pause();
       const currentAudio = audio.current;
       audio.current = null;
       fanAudio.current = null;
       doorLoop.current = null;
+      freddyLaugh.current = null;
+      freddySlowLaugh.current = null;
       if (currentAudio) void currentAudio.close();
     };
   }, []);
@@ -115,6 +131,22 @@ export function useGameSounds(state: GameState, isPaused = false) {
     (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
       const current = state.animatronics[name];
       const previous = previousAnims.current[name];
+      const arrivedAtRightDoor = name === 'freddy'
+        && current.mode === 'door'
+        && current.route[current.routeIndex] === 'right'
+        && (previous.mode !== 'door' || previous.routeIndex !== current.routeIndex);
+      if (arrivedAtRightDoor && freddyLaugh.current) {
+        freddyLaugh.current.currentTime = 0;
+        void freddyLaugh.current.play().catch(() => undefined);
+      }
+      const arrivedAtLeftDoor = name === 'freddy'
+        && current.mode === 'door'
+        && current.route[current.routeIndex] === 'left'
+        && (previous.mode !== 'door' || previous.routeIndex !== current.routeIndex);
+      if (arrivedAtLeftDoor && freddySlowLaugh.current) {
+        freddySlowLaugh.current.currentTime = 0;
+        void freddySlowLaugh.current.play().catch(() => undefined);
+      }
       const previousSpot = current.route[previous.routeIndex];
       const currentSpot = current.route[current.routeIndex];
       const changedCamera = current.routeIndex > previous.routeIndex

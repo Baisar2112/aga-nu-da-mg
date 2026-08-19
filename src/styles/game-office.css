@@ -19,7 +19,10 @@
 .rain { position: absolute; inset: -50%; transform: rotate(18deg); background: repeating-linear-gradient(90deg, transparent 0 30px, #70877f 31px, transparent 32px 55px); opacity: .2; animation: rain .9s linear infinite; }.rain--two { animation-duration: 1.4s; left: -20%; }
 @keyframes rain { to { transform: rotate(18deg) translateY(80px); } }
 .fuse-box { position: absolute; left: 24%; top: 29%; width: 52px; height: 75px; z-index: 4; }
-.chick { display: none; position: absolute; left: 20%; bottom: 25%; z-index: 7; width: 48px; height: 54px; border: 0; border-radius: 50% 50% 35% 35%; background: #b79a32; opacity: 0; }.chick--present { display: block; }.chick--lit { opacity: 1; }.chick i { color: #121510; margin: 3px; }.chick b { display: block; color: #e98529; }
+.chick { display: none; position: absolute; left: 16%; bottom: 24%; z-index: 7; width: 12%; height: 24%; padding: 0; overflow: visible; border: 0; background: transparent; opacity: 0; cursor: pointer; }
+.chick--present { display: block; opacity: .38; }
+.chick--lit { opacity: .92; }
+.chick img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; mix-blend-mode: screen; transform: scale(1.45); pointer-events: none; }
 .desk { position: absolute; left: 25%; right: 25%; bottom: 0; height: 27%; background: linear-gradient(#302d28 0 8%, #171714 9%); clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%); z-index: 5; }
 .drawer { position: absolute; right: 5%; top: 24%; width: 22%; height: 40%; color: #858a85; background: #23231f; border: 2px solid #3a3b35; }.drawer--open { transform: translateY(25px); background: #090a09; }.drawer span { font-size: 8px; letter-spacing: .15em; }.drawer i { display: block; margin-top: 12px; font-style: normal; }
 .flashlight-beam { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(circle 150px at var(--light-x) var(--light-y), rgba(255,246,195,.35), rgba(255,246,195,.08) 45%, transparent 72%); mix-blend-mode: screen; }

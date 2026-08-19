@@ -16,8 +16,9 @@
   bottom: 23%;
   width: 11%;
   overflow: hidden;
-  border: 6px solid #111413;
+  border: 6px solid #0b0e0d;
   background: transparent;
+  box-shadow: inset 0 0 24px #000d, 0 0 15px #0009;
 }
 
 .office-door--left {
@@ -33,19 +34,24 @@
 }
 
 .door-slab {
-  border-bottom: 9px solid #080a09;
+  border-bottom: 9px solid #060807;
   background:
-    repeating-linear-gradient(90deg, transparent 0 29px, #555 29px 33px),
-    repeating-linear-gradient(0deg, #090909 0 27px, #3d3d3d 27px 32px, #151515 32px 38px);
-  filter: grayscale(1) contrast(1.2);
+    radial-gradient(ellipse at 24% 32%, #000b 0 5%, transparent 19%),
+    radial-gradient(ellipse at 78% 68%, #0009 0 4%, transparent 17%),
+    repeating-linear-gradient(112deg, transparent 0 43px, #73787112 44px 45px, transparent 46px 83px),
+    repeating-linear-gradient(90deg, transparent 0 29px, #292d2a 29px 31px, #151816 31px 34px),
+    repeating-linear-gradient(0deg, #090b0a 0 27px, #292c29 27px 29px, #181a18 29px 32px, #0d0f0e 32px 38px);
+  box-shadow: inset 12px 0 22px #000b, inset -12px 0 22px #000b, inset 0 18px 28px #000c;
+  filter: grayscale(.85) brightness(.76) contrast(.92) saturate(.45);
 }
 
 .door-slab::before {
   position: absolute;
   inset: 8% 12%;
   content: '';
-  border: 5px solid #191919;
-  box-shadow: inset 0 0 0 3px #777;
+  border: 5px solid #101311;
+  box-shadow: inset 0 0 0 2px #343833, inset 0 0 20px #000d, 0 0 10px #000b;
+  opacity: .82;
 }
 
 .door-slab::after {
@@ -55,7 +61,11 @@
   left: 10%;
   height: 10px;
   content: '';
-  background: repeating-linear-gradient(90deg, #111 0 16px, #aaa 16px 32px);
+  background:
+    linear-gradient(#0007, transparent 45%, #0009),
+    repeating-linear-gradient(90deg, #0b0d0c 0 16px, #444843 16px 29px, #252825 29px 32px);
+  box-shadow: 0 2px 5px #000c;
+  opacity: .68;
 }
 
 /* The generated window stays visible; only enemies are drawn above its glass. */
@@ -168,7 +178,7 @@
 .fuse-box:not(:disabled):hover { background: #a2a69c56; }
 .fuse-box:disabled { cursor: default; }
 
-.chick { left: 18%; bottom: 24%; z-index: 9; }
+.chick { left: 16%; bottom: 24%; z-index: 9; }
 .flashlight-beam {
   z-index: 10;
   background: radial-gradient(circle 220px at var(--light-x) var(--light-y), rgba(255, 248, 200, .42), rgba(255, 248, 200, .12) 48%, transparent 76%);
@@ -177,17 +187,17 @@
 .wall-door-button {
   position: absolute;
   z-index: 12;
-  top: 47.2%;
+  top: 48.75%;
   display: none;
-  width: 2.15%;
-  height: 9.4%;
-  padding: 5px;
-  border: 3px solid #070908;
+  width: 1.45%;
+  height: 6.3%;
+  padding: 3px;
+  border: 2px solid #070908;
   border-radius: 0;
   background: #202421;
   box-shadow:
-    inset 3px 3px 0 #444a46,
-    inset -3px -3px 0 #111311;
+    inset 2px 2px 0 #444a46,
+    inset -2px -2px 0 #111311;
   appearance: none;
   image-rendering: pixelated;
   touch-action: manipulation;
@@ -203,22 +213,22 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 2px solid #38090d;
+  border: 1px solid #38090d;
   background: #991821;
   box-shadow: inset 4px 4px 0 #c8323c, inset -5px -5px 0 #570b11;
 }
 .wall-door-button span::after {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 3px;
+  left: 3px;
   width: 45%;
-  height: 4px;
+  height: 3px;
   content: '';
   background: #e04a52;
-  box-shadow: 0 4px 0 #b72832;
+  box-shadow: 0 3px 0 #b72832;
 }
-.wall-door-button--left { left: 4.55%; }
-.wall-door-button--right { right: 4.55%; }
+.wall-door-button--left { left: 4.9%; }
+.wall-door-button--right { right: 4.9%; }
 .wall-door-button:hover span {
   background: #ad1b25;
   box-shadow: inset 4px 4px 0 #d43a44, inset -5px -5px 0 #620c13;
