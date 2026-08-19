@@ -10,10 +10,12 @@ interface Props {
   onChick: () => void;
   onAim: (atRoomEight: boolean) => void;
   onFlashlight: () => void;
+  onLeftDoor: () => void;
+  onRightDoor: () => void;
 }
 
 export function OfficeScene(props: Props) {
-  const { state, onDrawer, onBox, onChick, onAim, onFlashlight } = props;
+  const { state, onDrawer, onBox, onChick, onAim, onFlashlight, onLeftDoor, onRightDoor } = props;
   const [pointer, setPointer] = useState({ x: 50, y: 42 });
   const anims = state.animatronics;
   const moveLight = (event: PointerEvent<HTMLElement>) => {
@@ -51,8 +53,8 @@ export function OfficeScene(props: Props) {
     <Door side="right" closed={state.rightDoor.closed} moving={state.rightDoor.moving} blocked={state.rightDoor.blocked} />
     <div className="door-control door-control--left"><i /><i /></div>
     <div className="door-control door-control--right"><i /><i /></div>
-    <div className="mobile-old-control-cover mobile-old-control-cover--left" aria-hidden="true" />
-    <div className="mobile-old-control-cover mobile-old-control-cover--right" aria-hidden="true" />
+    <WallDoorButton side="left" closed={state.leftDoor.closed} onClick={onLeftDoor} />
+    <WallDoorButton side="right" closed={state.rightDoor.closed} onClick={onRightDoor} />
     <div className="window-frame">
       <div className="room-eight"><span className="room-eight__sign">ROOM 8</span><i /><i /><i /></div>
       <WindowThreat animatronics={anims} isLit={state.flashlightOn && state.flashlightAtWindow} />
@@ -80,4 +82,12 @@ export function OfficeScene(props: Props) {
 
 function Door({ side, closed, moving, blocked }: { side: 'left' | 'right'; closed: boolean; moving: boolean; blocked: boolean }) {
   return <div className={`office-door office-door--${side} ${closed ? 'office-door--closed' : ''} ${moving ? 'office-door--moving' : ''} ${blocked ? 'office-door--blocked' : ''}`}><div className="door-slab"><i /><i /><i /></div></div>;
+}
+
+function WallDoorButton({ side, closed, onClick }: { side: 'left' | 'right'; closed: boolean; onClick: () => void }) {
+  const label = side === 'left' ? 'Левая дверь' : 'Правая дверь';
+  return <button className={`wall-door-button wall-door-button--${side}`} type="button"
+    aria-label={label} aria-pressed={closed} onClick={onClick}>
+    <span aria-hidden="true" />
+  </button>;
 }

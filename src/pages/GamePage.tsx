@@ -86,6 +86,8 @@ export function GamePage() {
 
   const office = <OfficeScene state={state} onDrawer={openDrawer}
       onFlashlight={() => game.setFlashlight(!state.flashlightOn)}
+      onLeftDoor={() => game.toggleDoor('left')}
+      onRightDoor={() => game.toggleDoor('right')}
       onAim={(atRoomEight) => action((next) => { next.flashlightAtWindow = atRoomEight; })}
       onBox={() => action((next) => {
         if (next.problems.outageActive && next.hasTape) next.repairOpen = true;
@@ -102,8 +104,7 @@ export function GamePage() {
     <GameHud state={state} />
     <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
     {!isPaused && !computerVisible && !state.repairOpen && !state.gameOver && !state.won &&
-      <TouchControls onLeftDoor={() => game.toggleDoor('left')} onRightDoor={() => game.toggleDoor('right')}
-        onTablet={toggleTablet}
+      <TouchControls onTablet={toggleTablet}
         onPause={() => { setIsPaused(true); setPauseSelection(0); }} />}
     {computerVisible && <ComputerScreen state={state} close={toggleTablet}
       notesOpen={notesOpen} setNotesOpen={setNotesOpen}

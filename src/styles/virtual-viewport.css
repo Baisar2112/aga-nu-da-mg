@@ -63,27 +63,6 @@
 }
 
 .touch-controls { display: none; }
-.touch-door-button {
-  width: 116px;
-  height: 116px;
-  padding: 12px;
-  border: 5px solid #050505;
-  border-radius: 12px;
-  background: #343734;
-  box-shadow: inset 0 0 0 4px #767b76, 0 6px 0 #050505;
-}
-.touch-door-button span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 5px solid #66120f;
-  border-radius: 50%;
-  background: #c82f27;
-  box-shadow: inset 9px 9px 0 #ed554c, inset -10px -10px 0 #7b1713, 0 0 14px #b32620;
-}
-.touch-door-button:active { transform: translateY(5px); box-shadow: inset 0 0 0 4px #767b76; }
-.touch-door-button:active span { background: #a8221c; box-shadow: inset 8px 8px 0 #6f1713; }
-
 .touch-tablet-button {
   width: min(460px, 58vw);
   height: 72px;
@@ -113,6 +92,5 @@
 }
 
 @media (max-height: 520px) and (hover: none), (max-height: 520px) and (pointer: coarse) {
-  .touch-door-button { width: 88px; height: 88px; padding: 9px; }
   .touch-tablet-button { width: min(400px, 48vw); height: 58px; }
 }

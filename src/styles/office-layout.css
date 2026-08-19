@@ -9,8 +9,6 @@
 .ceiling,
 .door-control { display: none; }
 
-.mobile-old-control-cover { display: none; }
-
 /* The slabs line up with the dark openings painted into the side walls. */
 .office-door {
   z-index: 4;
@@ -176,19 +174,68 @@
   background: radial-gradient(circle 220px at var(--light-x) var(--light-y), rgba(255, 248, 200, .42), rgba(255, 248, 200, .12) 48%, transparent 76%);
 }
 
+.wall-door-button {
+  position: absolute;
+  z-index: 12;
+  top: 47.2%;
+  display: none;
+  width: 2.15%;
+  height: 9.4%;
+  padding: 5px;
+  border: 3px solid #070908;
+  border-radius: 0;
+  background: #202421;
+  box-shadow:
+    inset 3px 3px 0 #444a46,
+    inset -3px -3px 0 #111311;
+  appearance: none;
+  image-rendering: pixelated;
+  touch-action: manipulation;
+}
+.wall-door-button::before {
+  position: absolute;
+  inset: -24px;
+  content: '';
+}
+.wall-door-button span {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 2px solid #38090d;
+  background: #991821;
+  box-shadow: inset 4px 4px 0 #c8323c, inset -5px -5px 0 #570b11;
+}
+.wall-door-button span::after {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 45%;
+  height: 4px;
+  content: '';
+  background: #e04a52;
+  box-shadow: 0 4px 0 #b72832;
+}
+.wall-door-button--left { left: 4.55%; }
+.wall-door-button--right { right: 4.55%; }
+.wall-door-button:hover span {
+  background: #ad1b25;
+  box-shadow: inset 4px 4px 0 #d43a44, inset -5px -5px 0 #620c13;
+}
+.wall-door-button:focus-visible { outline: 5px solid #b69543; outline-offset: 4px; }
+.wall-door-button:active span,
+.wall-door-button[aria-pressed='true'] span,
+.wall-door-button[aria-pressed='true']:hover span {
+  background: #631017;
+  box-shadow: inset 5px 5px 0 #3d080d, inset -3px -3px 0 #8d1921;
+}
+.wall-door-button:active span::after,
+.wall-door-button[aria-pressed='true'] span::after {
+  background: #8f2027;
+  box-shadow: 0 6px 0 #74151c;
+}
+
 @media (hover: none), (pointer: coarse) {
-  .mobile-old-control-cover {
-    position: absolute;
-    z-index: 12;
-    top: 44.5%;
-    display: block;
-    width: 2.2%;
-    height: 8.5%;
-    border: 4px solid #090b0a;
-    background: repeating-linear-gradient(0deg, #101310 0 8px, #080a09 8px 14px);
-    box-shadow: inset 0 0 0 3px #171b18;
-    pointer-events: none;
-  }
-  .mobile-old-control-cover--left { left: 5%; }
-  .mobile-old-control-cover--right { right: 5%; }
+  .wall-door-button { display: block; }
 }
