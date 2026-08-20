@@ -44,7 +44,11 @@ export function resetAnimatronic(anim: AnimatronicState) {
 }
 
 function defend(anim: AnimatronicState, state: GameState, message: string) {
-  resetAnimatronic(anim);
+  if (anim.mode === 'door' || anim.mode === 'running') {
+    Object.assign(anim, { mode: 'retreating', timer: 1 });
+  } else {
+    resetAnimatronic(anim);
+  }
   Object.assign(state, { message, messageTime: 3 });
 }
 
@@ -63,7 +67,9 @@ function attackDoor(anim: AnimatronicState, state: GameState, dt: number) {
   const side = anim.route[anim.route.length - 1] as 'left' | 'right';
   const door = side === 'left' ? state.leftDoor : state.rightDoor;
   const queued = Object.values(state.animatronics).some((item) =>
-    item.mode === 'door' && item.route[item.route.length - 1] === side && item.arrival < anim.arrival);
+    (item.mode === 'door' || item.mode === 'retreating')
+    && item.route[item.route.length - 1] === side
+    && item.arrival < anim.arrival);
   if (queued || door.moving) return;
   if (anim.name === 'freddy' && side === 'left') {
     if (state.flashlightOn && !state.flashlightAtWindow) anim.litTime += dt;
@@ -91,10 +97,13 @@ function attackWindow(anim: AnimatronicState, state: GameState, dt: number) {
 }
 
 function advance(anim: AnimatronicState, state: GameState, dt: number) {
+  if (anim.mode === 'retreating') {
+    if ((anim.timer -= dt) <= 0) resetAnimatronic(anim);
+    return;
+  }
   if (anim.name === 'fox') return stepFox(anim, state, dt, (message) => defend(anim, state, message));
-  if (anim.mode === 'retreating' || anim.mode === 'waiting') {
-    if (anim.mode === 'retreating') resetAnimatronic(anim);
-    else if ((anim.timer -= dt) <= 0) anim.mode = 'moving';
+  if (anim.mode === 'waiting') {
+    if ((anim.timer -= dt) <= 0) anim.mode = 'moving';
     return;
   }
   if (anim.mode === 'office') {
@@ -113,6 +122,11 @@ function advance(anim: AnimatronicState, state: GameState, dt: number) {
   if (shouldWaitBeforeDoor(anim, state)) {
     anim.timer = movementTime;
     anim.heldByRepair = true;
+    return;
+  }
+  const nextSpot = anim.route[anim.routeIndex + 1];
+  if (nextSpot === 'window' && state.watcher.position === 'end') {
+    anim.timer = movementTime;
     return;
   }
   anim.timer = 0;

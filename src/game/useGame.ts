@@ -59,7 +59,7 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
 
   const toggleDoor = useCallback((side: DoorSide) => {
     setState((current) => {
-      if (current.energy <= 0 || current.problems.outageActive || current.gameOver || current.won) return current;
+      if (current.energy <= 0 || current.problems.outageActive || current.maskOn || current.gameOver || current.won) return current;
       const own = side === 'left' ? current.leftDoor : current.rightDoor;
       const other = side === 'left' ? current.rightDoor : current.leftDoor;
       if (own.moving) return current;
@@ -98,7 +98,7 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
   }, []);
 
   const toggleTablet = useCallback(() => setState((current) => {
-    if (current.energy <= 0 || current.problems.outageActive) return current;
+    if (current.energy <= 0 || current.problems.outageActive || current.maskOn) return current;
     const next = structuredClone(current);
     if (next.computer === 'OFF') next.computer = 'CAMERA_VIEW';
     else {
@@ -109,8 +109,23 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
   }), []);
 
   const setFlashlight = useCallback((on: boolean) => setState((current) => {
-    if (current.flashlightBattery <= 0 || current.flashlightOn === on) return current;
+    if (current.maskOn || current.flashlightBattery <= 0 || current.flashlightOn === on) return current;
     return { ...current, flashlightOn: on, flashlightPulse: on ? current.flashlightPulse + 1 : current.flashlightPulse };
+  }), []);
+
+  const setMask = useCallback((on: boolean) => setState((current) => {
+    if (current.gameOver || current.won || current.maskOn === on) return current;
+    if (on && !current.hasMask) {
+      return { ...current, message: 'Сначала найдите маску в тумбочке.', messageTime: 3 };
+    }
+    return {
+      ...current,
+      maskOn: on,
+      flashlightOn: on ? false : current.flashlightOn,
+      computer: on ? 'OFF' : current.computer,
+      rebootTime: on ? 0 : current.rebootTime,
+      repairOpen: on ? false : current.repairOpen,
+    };
   }), []);
 
   const action = useCallback((change: (next: GameState) => void) => setState((current) => {
@@ -131,5 +146,5 @@ export function useGame(isPaused = false, isReadingGuardNote = false) {
     return loadCheckpoint() ?? createConfiguredState();
   }), []);
 
-  return { state, setState, toggleDoor, toggleTablet, setFlashlight, action, restart };
+  return { state, setState, toggleDoor, toggleTablet, setFlashlight, setMask, action, restart };
 }

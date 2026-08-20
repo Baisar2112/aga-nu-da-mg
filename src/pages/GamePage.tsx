@@ -4,6 +4,7 @@ import { ComputerScreen } from '../components/game/ComputerScreen';
 import { EndScreen } from '../components/game/EndScreen';
 import { GameHud } from '../components/game/GameHud';
 import { Jumpscare, jumpscareImages } from '../components/game/Jumpscare';
+import { MaskOverlay } from '../components/game/MaskOverlay';
 import { OfficeScene } from '../components/game/OfficeScene';
 import { PauseMenu } from '../components/game/PauseMenu';
 import { RepairPanel } from '../components/game/RepairPanel';
@@ -13,6 +14,7 @@ import { FIRST_PHASE_SECONDS } from '../game/constants';
 import { resetAnimatronic } from '../game/animatronics';
 import { useGame } from '../game/useGame';
 import { useGameSounds } from '../game/useGameSounds';
+import { useWatcherSounds } from '../game/useWatcherSounds';
 
 export function GamePage() {
   const [, navigate] = useLocation();
@@ -22,10 +24,14 @@ export function GamePage() {
   const game = useGame(isPaused, notesOpen);
   const { state, action } = game;
   useGameSounds(state, isPaused);
+  useWatcherSounds(state, isPaused);
   const computerVisible = ['WORKING', 'CAMERA_VIEW', 'REBOOTING'].includes(state.computer);
 
   useEffect(() => {
-    jumpscareImages.forEach((src) => { new Image().src = src; });
+    [...jumpscareImages,
+      '/images/security-office-watcher-end.png',
+      '/images/security-office-watcher-turned.png',
+    ].forEach((src) => { new Image().src = src; });
   }, []);
 
   useEffect(() => {
@@ -57,19 +63,21 @@ export function GamePage() {
       }
       if (event.code === 'KeyA') game.toggleDoor('left');
       if (event.code === 'KeyD') game.toggleDoor('right');
+      if (event.code === 'KeyS') game.setMask(!state.maskOn);
       if (event.code === 'Space') { event.preventDefault(); toggleTablet(); }
     };
     window.addEventListener('keydown', keyDown);
     return () => window.removeEventListener('keydown', keyDown);
-  }, [computerVisible, game.toggleDoor, game.toggleTablet, isPaused, navigate, pauseSelection, state.gameOver, state.won]);
+  }, [computerVisible, game.setMask, game.toggleDoor, game.toggleTablet, isPaused, navigate, pauseSelection, state.gameOver, state.maskOn, state.won]);
 
   const openDrawer = () => action((next) => {
     if (next.drawerOpen) return;
     next.drawerOpen = true;
-    if (!next.hasTape || !next.hasFlashlight) {
+    if (!next.hasTape || !next.hasFlashlight || !next.hasMask) {
       next.hasTape = true;
       next.hasFlashlight = true;
-      Object.assign(next, { message: 'Вы забрали фонарик и изоленту.', messageTime: 4 });
+      next.hasMask = true;
+      Object.assign(next, { message: 'Вы забрали фонарик, изоленту и маску.', messageTime: 4 });
     }
   });
 
@@ -107,9 +115,11 @@ export function GamePage() {
 
   return <VirtualViewport className={`game-shell${isPaused ? ' game-shell--paused' : ''}`} world={office}>
     <GameHud state={state} />
-    <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
+    <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>S</kbd> {state.hasMask ? 'МАСКА' : 'НЕТ МАСКИ'}</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
+    {state.maskOn && <MaskOverlay />}
     {!isPaused && !computerVisible && !state.repairOpen && !state.gameOver && !state.won &&
       <TouchControls onTablet={toggleTablet}
+        hasMask={state.hasMask} maskOn={state.maskOn} onMask={() => game.setMask(!state.maskOn)}
         onPause={() => { setIsPaused(true); setPauseSelection(0); }} />}
     {computerVisible && <ComputerScreen state={state} close={toggleTablet}
       notesOpen={notesOpen} setNotesOpen={setNotesOpen}

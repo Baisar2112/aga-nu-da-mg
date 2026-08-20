@@ -21,6 +21,9 @@ export const SPAWN_TIMES: Record<AnimatronicName, number> = {
   freddy: clockMinutesToElapsed(4 * 60),
 };
 
+export const WATCHER_SPAWN_TIME = clockMinutesToElapsed(2 * 60 + 20);
+export const WATCHER_SPEED = 1.3;
+
 export const BASE_SPEED: Record<AnimatronicName, number> = {
   crocodile: 1,
   dog: 1,
@@ -52,6 +55,8 @@ export function createInitialState(customRules?: GameRules): GameState {
     energy: 100,
     flashlightBattery: 100,
     hasFlashlight: false,
+    hasMask: false,
+    maskOn: false,
     flashlightOn: false,
     flashlightAtWindow: true,
     flashlightPulse: 0,
@@ -85,6 +90,15 @@ export function createInitialState(customRules?: GameRules): GameState {
       chick: animatronic('chick'),
       freddy: animatronic('freddy'),
     },
+    watcher: {
+      active: false,
+      position: 'start',
+      moveTimer: 0,
+      turnTimer: 3,
+      attackTimer: 3,
+      maskTime: 0,
+      headTurned: false,
+    },
     message: 'Ночь началась. Продержитесь до 06:00.',
     messageTime: 5,
     gameOver: null,
@@ -102,6 +116,7 @@ function createDefaultRules(): GameRules {
       chick: { enabled: true, spawnTime: SPAWN_TIMES.chick, speed: BASE_SPEED.chick },
       freddy: { enabled: true, spawnTime: SPAWN_TIMES.freddy, speed: BASE_SPEED.freddy },
     },
+    watcher: { enabled: true, spawnTime: WATCHER_SPAWN_TIME, speed: WATCHER_SPEED },
     problems: {
       outage: { enabled: true, at: between(clockMinutesToElapsed(30), clockMinutesToElapsed(105)) },
       static: { enabled: true, at: between(clockMinutesToElapsed(130), clockMinutesToElapsed(180)) },

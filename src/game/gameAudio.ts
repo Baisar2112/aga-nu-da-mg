@@ -71,40 +71,6 @@ export function playMetalHit(audio: AudioContext) {
   source.start();
 }
 
-export function playGlassKnock(audio: AudioContext, output: AudioNode = audio.destination) {
-  const start = audio.currentTime;
-  const length = Math.floor(audio.sampleRate * .24);
-  const buffer = audio.createBuffer(1, length, audio.sampleRate);
-  const samples = buffer.getChannelData(0);
-  for (let index = 0; index < length; index += 1) {
-    samples[index] = (Math.random() * 2 - 1) * Math.exp(-index / (length * .12));
-  }
-
-  const impact = audio.createBufferSource();
-  const impactFilter = audio.createBiquadFilter();
-  const impactGain = audio.createGain();
-  impact.buffer = buffer;
-  impactFilter.type = 'bandpass';
-  impactFilter.frequency.value = 520;
-  impactFilter.Q.value = 1.8;
-  impactGain.gain.value = .3;
-  impact.connect(impactFilter).connect(impactGain).connect(output);
-  impact.start(start);
-
-  [1180, 1760].forEach((frequency, index) => {
-    const ring = audio.createOscillator();
-    const ringGain = audio.createGain();
-    ring.type = 'sine';
-    ring.frequency.setValueAtTime(frequency, start);
-    ring.frequency.exponentialRampToValueAtTime(frequency * .82, start + .18);
-    ringGain.gain.setValueAtTime(.055 / (index + 1), start);
-    ringGain.gain.exponentialRampToValueAtTime(.001, start + .2);
-    ring.connect(ringGain).connect(output);
-    ring.start(start);
-    ring.stop(start + .21);
-  });
-}
-
 export function playPowerFailure(audio: AudioContext) {
   const start = audio.currentTime;
   const duration = 1.35;

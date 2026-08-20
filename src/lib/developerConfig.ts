@@ -1,5 +1,8 @@
 import type { AnimatronicName, GameRules } from '../game/types';
-import { BASE_SPEED, clockMinutesToElapsed, DEFAULT_OFFICE_BRIGHTNESS, SPAWN_TIMES } from '../game/constants';
+import {
+  BASE_SPEED, clockMinutesToElapsed, DEFAULT_OFFICE_BRIGHTNESS, SPAWN_TIMES,
+  WATCHER_SPAWN_TIME, WATCHER_SPEED,
+} from '../game/constants';
 
 const STORAGE_KEY = 'last-night-at-freddy.developer-rules.v3';
 const PREVIOUS_STORAGE_KEY = 'last-night-at-freddy.developer-rules.v2';
@@ -20,6 +23,7 @@ export function createConsoleDefaults(): GameRules {
       chick: { enabled: true, spawnTime: SPAWN_TIMES.chick, speed: BASE_SPEED.chick },
       freddy: { enabled: true, spawnTime: SPAWN_TIMES.freddy, speed: BASE_SPEED.freddy },
     },
+    watcher: { enabled: true, spawnTime: WATCHER_SPAWN_TIME, speed: WATCHER_SPEED },
     problems: {
       outage: { enabled: true, at: clockMinutesToElapsed(68) },
       static: { enabled: true, at: clockMinutesToElapsed(154) },
@@ -49,6 +53,7 @@ export function loadDeveloperConfig(): GameRules | null {
       localStorage.removeItem(PREVIOUS_STORAGE_KEY);
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
+    rules.watcher ??= { enabled: true, spawnTime: WATCHER_SPAWN_TIME, speed: WATCHER_SPEED };
     return rules;
   } catch {
     localStorage.removeItem(STORAGE_KEY);

@@ -44,6 +44,10 @@ export function DeveloperConsole({ close }: { close: () => void }) {
     } }));
   };
 
+  const updateWatcher = (patch: Partial<GameRules['watcher']>) => {
+    setRules((current) => ({ ...current, watcher: { ...current.watcher, ...patch } }));
+  };
+
   const save = (event: FormEvent) => {
     event.preventDefault();
     const normalized = structuredClone(rules);
@@ -52,6 +56,8 @@ export function DeveloperConsole({ close }: { close: () => void }) {
       normalized.animatronics[name].spawnTime = clamp(normalized.animatronics[name].spawnTime, 0, NIGHT_SECONDS);
       normalized.animatronics[name].speed = clamp(normalized.animatronics[name].speed, .1, 5);
     });
+    normalized.watcher.spawnTime = clamp(normalized.watcher.spawnTime, 0, NIGHT_SECONDS);
+    normalized.watcher.speed = clamp(normalized.watcher.speed, .1, 5);
     PROBLEMS.forEach(({ name }) => {
       normalized.problems[name].at = clamp(normalized.problems[name].at, 0, NIGHT_SECONDS);
     });
@@ -89,6 +95,14 @@ export function DeveloperConsole({ close }: { close: () => void }) {
           <NumberField label="СКОРОСТЬ" value={rules.animatronics[name].speed} step={.1}
             change={(speed) => updateAnim(name, { speed })} />
         </div>)}
+        <div className="developer-row">
+          <label><input type="checkbox" checked={rules.watcher.enabled}
+            onChange={(event) => updateWatcher({ enabled: event.target.checked })} /> Смотритель</label>
+          <GameTimeField label="ПОЯВЛЕНИЕ" value={rules.watcher.spawnTime}
+            change={(spawnTime) => updateWatcher({ spawnTime })} />
+          <NumberField label="СКОРОСТЬ" value={rules.watcher.speed} step={.1}
+            change={(speed) => updateWatcher({ speed })} />
+        </div>
       </section>
       <section><h3>ПРОБЛЕМЫ</h3>
         {PROBLEMS.map(({ name, label }) => <div className="developer-row developer-row--problem" key={name}>

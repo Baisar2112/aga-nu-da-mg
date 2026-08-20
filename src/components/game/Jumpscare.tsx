@@ -1,17 +1,23 @@
 import { useEffect, useState } from 'react';
 
-type JumpscareName = 'crocodile' | 'dog' | 'freddy';
+type JumpscareName = 'crocodile' | 'dog' | 'freddy' | 'watcher';
 
 const characterByReason: Array<[string, JumpscareName]> = [
   ['Крокодил', 'crocodile'],
   ['Собака', 'dog'],
   ['Фредди', 'freddy'],
+  ['Смотритель', 'watcher'],
 ];
 
 export const jumpscareImages = characterByReason.flatMap(([, name]) => [
-  `/images/jumpscare-${name}-1.jpg`,
-  `/images/jumpscare-${name}-2.jpg`,
+  jumpscareImage(name, 1),
+  jumpscareImage(name, 2),
 ]);
+
+function jumpscareImage(name: JumpscareName, frame: 1 | 2) {
+  const extension = name === 'watcher' ? 'png' : 'jpg';
+  return `/images/jumpscare-${name}-${frame}.${extension}`;
+}
 
 interface Props {
   reason: string;
@@ -30,8 +36,8 @@ export function Jumpscare({ reason }: Props) {
 
   return <div className={`jumpscare jumpscare--${name}`} aria-hidden="true">
     <img className="jumpscare__frame jumpscare__frame--one"
-      src={`/images/jumpscare-${name}-1.jpg`} alt="" />
+      src={jumpscareImage(name, 1)} alt="" />
     <img className="jumpscare__frame jumpscare__frame--two"
-      src={`/images/jumpscare-${name}-2.jpg`} alt="" />
+      src={jumpscareImage(name, 2)} alt="" />
   </div>;
 }

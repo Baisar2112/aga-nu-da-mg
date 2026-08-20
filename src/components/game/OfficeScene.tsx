@@ -31,9 +31,18 @@ export function OfficeScene(props: Props) {
     moveLight(event);
     if (state.hasFlashlight) onFlashlight();
   };
-  const officeClass = `office${state.problems.outageActive ? ' office--power-outage' : ''}`;
+  const watcherAlert = state.watcher.position === 'end' && state.watcher.headTurned;
+  const officeClass = `office${state.problems.outageActive ? ' office--power-outage' : ''}${watcherAlert ? ' office--watcher-alert' : ''}`;
   const brightness = .4 + (state.rules.officeBrightness ?? DEFAULT_OFFICE_BRIGHTNESS) * .015;
-  const officeStyle = { '--office-brightness': brightness } as React.CSSProperties;
+  const watcherImage = state.watcher.position !== 'end'
+    ? '/images/security-office-background-v4.png'
+    : watcherAlert
+      ? '/images/security-office-watcher-turned.png'
+      : '/images/security-office-watcher-end.png';
+  const officeStyle = {
+    '--office-brightness': brightness,
+    backgroundImage: `url('${watcherImage}')`,
+  } as React.CSSProperties;
   return <main className={officeClass} style={officeStyle} onPointerMove={moveLight} onPointerUp={touchFlashlight}
     onContextMenu={(event) => { event.preventDefault(); if (state.hasFlashlight) onFlashlight(); }}>
     <div className="office-depth" aria-hidden="true">

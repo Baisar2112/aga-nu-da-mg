@@ -1,13 +1,21 @@
 /* Generated pixel-art room with interactive game elements layered on top. */
 .office {
   isolation: isolate;
-  background: #050606 url('/images/security-office-background-v3.png') center / 100% 100% no-repeat;
+  background: #050606 url('/images/security-office-background-v4.png') center / 100% 100% no-repeat;
 }
 
 .office::before,
 .office-depth,
 .ceiling,
 .door-control { display: none; }
+
+.office--watcher-alert { animation: watcher-office-flicker .16s steps(1) infinite; }
+
+@keyframes watcher-office-flicker {
+  0%, 42%, 70%, 100% { filter: contrast(1.12) saturate(.55) brightness(var(--office-brightness, 1)); }
+  43%, 55% { filter: contrast(1.3) saturate(.35) brightness(.32); }
+  56%, 69% { filter: contrast(1.18) saturate(.5) brightness(1.28); }
+}
 
 /* The slabs line up with the dark openings painted into the side walls. */
 .office-door {
@@ -80,7 +88,20 @@
   background: transparent;
   box-shadow: none;
   overflow: hidden;
+  contain: paint;
+  clip-path: inset(0);
   pointer-events: none;
+}
+
+.window-frame::after {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  content: '';
+  background:
+    linear-gradient(112deg, transparent 0 31%, rgba(190, 205, 194, .08) 33%, transparent 39%),
+    linear-gradient(165deg, rgba(99, 119, 107, .12), transparent 42%, rgba(4, 7, 6, .2));
+  box-shadow: inset 0 0 34px rgba(0, 0, 0, .72);
 }
 
 .room-eight { visibility: hidden; }

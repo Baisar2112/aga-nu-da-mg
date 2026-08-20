@@ -1,0 +1,18 @@
+.security-mask {
+  position: absolute;
+  z-index: 22;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+
+.security-mask__shell {
+  position: absolute;
+  inset: -3% -2%;
+  width: 104%;
+  height: 106%;
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
+  transform: translateZ(0);
+}

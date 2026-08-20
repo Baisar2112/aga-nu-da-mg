@@ -1,5 +1,6 @@
 import { NIGHT_SECONDS } from './constants';
 import { stepAnimatronics } from './animatronics';
+import { stepWatcher } from './watcher';
 import type { GameState } from './types';
 
 export function stepGame(previous: GameState, dt: number) {
@@ -12,6 +13,7 @@ export function stepGame(previous: GameState, dt: number) {
   updateProblems(state, dt);
   updatePower(state, dt);
   stepAnimatronics(state, dt);
+  stepWatcher(state, dt);
 
   if (state.elapsed >= NIGHT_SECONDS && !state.gameOver) state.won = true;
   return state;

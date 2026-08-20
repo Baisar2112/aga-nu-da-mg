@@ -1,5 +1,6 @@
 import type { GameState } from '../game/types';
 import { clockMinutesToElapsed, createInitialState, FIRST_PHASE_SECONDS, NIGHT_SECONDS } from '../game/constants';
+import { createWatcherState } from '../game/watcher';
 
 const SAVE_KEY = 'last-night-at-freddy.phase-save.v1';
 const COMPLETED_KEY = 'last-night-at-freddy.completed.v1';
@@ -31,10 +32,14 @@ export function loadCheckpoint(): GameState | null {
       });
       saved.cameraLayoutVersion = 2;
     }
+    saved.rules.watcher ??= structuredClone(fallback.rules.watcher);
     return {
       ...saved,
       rules: saved.rules ?? fallback.rules,
       hasFlashlight: saved.hasFlashlight ?? saved.hasTape ?? false,
+      hasMask: saved.hasMask ?? saved.drawerOpen ?? false,
+      maskOn: false,
+      watcher: saved.watcher ?? createWatcherState(),
       computer: saved.computer === 'ON' || saved.computer === 'WORKING' ? 'OFF' : saved.computer,
       leftDoor: { ...saved.leftDoor, blocked: saved.leftDoor.blocked ?? false },
       rightDoor: { ...saved.rightDoor, blocked: saved.rightDoor.blocked ?? false },
@@ -76,6 +81,7 @@ function migrateVersionTwoTime(state: GameState) {
 function convertGameTimestamps(state: GameState, convert: (seconds: number) => number) {
   const timestamp = (seconds: number) => seconds >= 900 ? seconds : convert(seconds);
   Object.values(state.rules.animatronics).forEach((rule) => { rule.spawnTime = convert(rule.spawnTime); });
+  if (state.rules.watcher) state.rules.watcher.spawnTime = convert(state.rules.watcher.spawnTime);
   Object.values(state.rules.problems).forEach((rule) => { rule.at = convert(rule.at); });
   state.problems.outageAt = timestamp(state.problems.outageAt);
   state.problems.staticAt = timestamp(state.problems.staticAt);

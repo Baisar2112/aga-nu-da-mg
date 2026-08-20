@@ -34,6 +34,7 @@
 .jumpscare--crocodile .jumpscare__frame { object-position: center 74%; transform: scale(1.18); }
 .jumpscare--dog .jumpscare__frame { object-position: center 61%; }
 .jumpscare--freddy .jumpscare__frame { object-position: center 58%; }
+.jumpscare--watcher .jumpscare__frame { object-position: center 48%; }
 
 @keyframes jumpscare-frame-one {
   0%, 23% { opacity: 1; }

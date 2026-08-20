@@ -12,18 +12,18 @@
 
 .threat-sprite--window {
   z-index: 3;
-  top: 3%;
-  left: 7%;
-  width: 86%;
-  height: 102%;
+  top: 5%;
+  left: 12%;
+  width: 76%;
+  height: 80%;
   object-position: center bottom;
   opacity: .48;
 }
 
 .threat-sprite--window.is-lit { opacity: .96; }
 .threat-sprite--freddy-window {
-  left: 9%;
-  width: 82%;
+  left: 13%;
+  width: 74%;
   opacity: .58;
   filter: brightness(.5) contrast(1.14) saturate(.5);
 }

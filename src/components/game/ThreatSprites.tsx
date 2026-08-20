@@ -1,4 +1,4 @@
-import type { GameState } from '../../game/types';
+import type { AnimatronicMode, GameState } from '../../game/types';
 
 type Animatronics = GameState['animatronics'];
 
@@ -26,13 +26,14 @@ interface DoorThreatsProps {
 }
 
 export function DoorThreats({ animatronics, leftIsLit }: DoorThreatsProps) {
-  const freddySide = animatronics.freddy.mode === 'door'
+  const staysAtDoor = (mode: AnimatronicMode) => mode === 'door' || mode === 'retreating';
+  const freddySide = staysAtDoor(animatronics.freddy.mode)
     ? animatronics.freddy.route[animatronics.freddy.route.length - 1]
     : null;
 
   return <>
     <div className="door-threat-slot door-threat-slot--left">
-      {animatronics.crocodile.mode === 'door' && <img
+      {staysAtDoor(animatronics.crocodile.mode) && <img
         className={`threat-sprite threat-sprite--door threat-sprite--crocodile ${leftIsLit ? 'is-lit' : ''}`}
         src="/images/crocodile-left-door.png" alt="" aria-hidden="true" />}
       {freddySide === 'left' && <img
@@ -40,14 +41,14 @@ export function DoorThreats({ animatronics, leftIsLit }: DoorThreatsProps) {
         src="/images/freddy-left-door.png" alt="" aria-hidden="true" />}
     </div>
     <div className="door-threat-slot door-threat-slot--right">
-      {animatronics.dog.mode === 'door' && <img
+      {staysAtDoor(animatronics.dog.mode) && <img
         className="threat-sprite threat-sprite--door threat-sprite--dog-door"
         src="/images/dog-right-door.png" alt="" aria-hidden="true" />}
       {freddySide === 'right' && <img
         className="threat-sprite threat-sprite--door threat-sprite--freddy-door"
         src="/images/freddy-right-door.png" alt="" aria-hidden="true" />}
     </div>
-    {animatronics.fox.mode === 'running' && <img
+    {(animatronics.fox.mode === 'running' || animatronics.fox.mode === 'retreating') && <img
       className="threat-sprite threat-sprite--fox-running"
       src="/images/fox-running.png" alt="" aria-hidden="true" />}
   </>;

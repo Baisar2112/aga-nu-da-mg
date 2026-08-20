@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { playGlassKnock, playHeavySteps, playMetalHit, playPowerFailure, playWarning } from './gameAudio';
+import { playHeavySteps, playMetalHit, playPowerFailure, playWarning } from './gameAudio';
 import type { AnimatronicName, AnimatronicState, GameState } from './types';
 
 type AnimSnapshot = Record<AnimatronicName, Pick<AnimatronicState, 'mode' | 'routeIndex'>>;
+
+const DOOR_KNOCK_DURATION_MS = 850;
 
 const snapshot = (state: GameState): AnimSnapshot => Object.fromEntries(
   Object.entries(state.animatronics).map(([name, anim]) => [name, {
@@ -15,6 +17,9 @@ export function useGameSounds(state: GameState, isPaused = false) {
   const audio = useRef<AudioContext | null>(null);
   const fanAudio = useRef<HTMLAudioElement | null>(null);
   const doorLoop = useRef<HTMLAudioElement | null>(null);
+  const doorKnock = useRef<HTMLAudioElement | null>(null);
+  const doorKnockTimer = useRef<number | null>(null);
+  const dogWindowKnock = useRef<HTMLAudioElement | null>(null);
   const freddyLaugh = useRef<HTMLAudioElement | null>(null);
   const freddySlowLaugh = useRef<HTMLAudioElement | null>(null);
   const doorThreatActive = useRef(false);
@@ -22,9 +27,10 @@ export function useGameSounds(state: GameState, isPaused = false) {
   const previousAnims = useRef(snapshot(state));
   const previousOutage = useRef(state.problems.outageActive);
   const paused = useRef(isPaused);
-  const dogAtDarkWindow = !state.gameOver && !state.won
-    && state.animatronics.dog.mode === 'window'
-    && !(state.flashlightOn && state.flashlightAtWindow);
+  const dogAtWindow = !state.gameOver && !state.won
+    && state.animatronics.dog.mode === 'window';
+  const dogWindowThreatActive = useRef(dogAtWindow);
+  dogWindowThreatActive.current = dogAtWindow;
 
   useEffect(() => {
     paused.current = isPaused;
@@ -32,6 +38,9 @@ export function useGameSounds(state: GameState, isPaused = false) {
     if (isPaused) {
       fanAudio.current?.pause();
       doorLoop.current?.pause();
+      doorKnock.current?.pause();
+      dogWindowKnock.current?.pause();
+      if (doorKnockTimer.current !== null) window.clearTimeout(doorKnockTimer.current);
       freddyLaugh.current?.pause();
       freddySlowLaugh.current?.pause();
       if (context?.state === 'running') void context.suspend();
@@ -41,6 +50,9 @@ export function useGameSounds(state: GameState, isPaused = false) {
     if (fanAudio.current?.paused) void fanAudio.current.play().catch(() => undefined);
     if (doorThreatActive.current && doorLoop.current?.paused) {
       void doorLoop.current.play().catch(() => undefined);
+    }
+    if (dogWindowThreatActive.current && dogWindowKnock.current?.paused) {
+      void dogWindowKnock.current.play().catch(() => undefined);
     }
   }, [isPaused]);
 
@@ -55,6 +67,9 @@ export function useGameSounds(state: GameState, isPaused = false) {
       if (doorThreatActive.current && doorLoop.current?.paused) {
         void doorLoop.current.play().catch(() => undefined);
       }
+      if (dogWindowThreatActive.current && dogWindowKnock.current?.paused) {
+        void dogWindowKnock.current.play().catch(() => undefined);
+      }
     };
     fanAudio.current = new Audio('/audio/fan-loop.m4a');
     fanAudio.current.preload = 'auto';
@@ -64,6 +79,13 @@ export function useGameSounds(state: GameState, isPaused = false) {
     doorLoop.current.preload = 'auto';
     doorLoop.current.loop = true;
     doorLoop.current.volume = .8;
+    doorKnock.current = new Audio('/audio/door-knock.mp3');
+    doorKnock.current.preload = 'auto';
+    doorKnock.current.volume = .9;
+    dogWindowKnock.current = new Audio('/audio/dog-window-knock.mp3');
+    dogWindowKnock.current.preload = 'auto';
+    dogWindowKnock.current.loop = true;
+    dogWindowKnock.current.volume = .85;
     freddyLaugh.current = new Audio('/audio/freddy-laugh.mp3');
     freddyLaugh.current.preload = 'auto';
     freddyLaugh.current.volume = .85;
@@ -80,12 +102,18 @@ export function useGameSounds(state: GameState, isPaused = false) {
       window.removeEventListener('keydown', startAudio);
       fanAudio.current?.pause();
       doorLoop.current?.pause();
+      doorKnock.current?.pause();
+      dogWindowKnock.current?.pause();
+      if (doorKnockTimer.current !== null) window.clearTimeout(doorKnockTimer.current);
       freddyLaugh.current?.pause();
       freddySlowLaugh.current?.pause();
       const currentAudio = audio.current;
       audio.current = null;
       fanAudio.current = null;
       doorLoop.current = null;
+      doorKnock.current = null;
+      dogWindowKnock.current = null;
+      doorKnockTimer.current = null;
       freddyLaugh.current = null;
       freddySlowLaugh.current = null;
       if (currentAudio) void currentAudio.close();
@@ -93,28 +121,19 @@ export function useGameSounds(state: GameState, isPaused = false) {
   }, []);
 
   useEffect(() => {
-    if (isPaused || !dogAtDarkWindow) return;
-    let output: GainNode | null = null;
-    const knock = () => {
-      const context = audio.current;
-      if (!context || context.state !== 'running') return;
-      if (!output) {
-        output = context.createGain();
-        output.gain.value = .75;
-        output.connect(context.destination);
-      }
-      playGlassKnock(context, output);
-    };
-    knock();
-    const timer = window.setInterval(knock, 950);
+    const knock = dogWindowKnock.current;
+    if (!knock) return;
+    if (isPaused || !dogAtWindow) {
+      knock.pause();
+      knock.currentTime = 0;
+      return;
+    }
+    void knock.play().catch(() => undefined);
     return () => {
-      window.clearInterval(timer);
-      if (!output) return;
-      const context = audio.current;
-      if (context) output.gain.setValueAtTime(0, context.currentTime);
-      output.disconnect();
+      knock.pause();
+      knock.currentTime = 0;
     };
-  }, [dogAtDarkWindow, isPaused]);
+  }, [dogAtWindow, isPaused]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -128,9 +147,28 @@ export function useGameSounds(state: GameState, isPaused = false) {
       doorLoop.current.currentTime = 0;
     }
 
+    const justRepelledAtDoor = (Object.keys(state.animatronics) as AnimatronicName[]).some((name) => {
+      const current = state.animatronics[name];
+      const previous = previousAnims.current[name];
+      return current.mode === 'retreating'
+        && (previous.mode === 'door' || previous.mode === 'running');
+    });
+    if (justRepelledAtDoor) previousMessage.current = state.message;
+
     (Object.keys(state.animatronics) as AnimatronicName[]).forEach((name) => {
       const current = state.animatronics[name];
       const previous = previousAnims.current[name];
+      const finishedWaitingAtDoor = previous.mode === 'retreating'
+        && current.mode !== 'retreating';
+      if (finishedWaitingAtDoor && doorKnock.current) {
+        if (doorKnockTimer.current !== null) window.clearTimeout(doorKnockTimer.current);
+        doorKnock.current.currentTime = 0;
+        void doorKnock.current.play().catch(() => undefined);
+        doorKnockTimer.current = window.setTimeout(() => {
+          doorKnock.current?.pause();
+          doorKnockTimer.current = null;
+        }, DOOR_KNOCK_DURATION_MS);
+      }
       const arrivedAtRightDoor = name === 'freddy'
         && current.mode === 'door'
         && current.route[current.routeIndex] === 'right'

@@ -33,6 +33,7 @@ export function ComputerScreen({ state, selectCamera, reboot, close, notesOpen, 
             <div className="tablet-workspace">
               <CameraMap selected={state.selectedCamera} movementDetected={movementDetected}
                 movementUnavailable={state.problems.staticActive}
+                watcherPosition={state.watcher.position}
                 selectCamera={selectCamera} />
             </div>
             <aside className="tablet-actions">

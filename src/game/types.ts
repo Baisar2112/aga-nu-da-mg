@@ -2,6 +2,7 @@ export type DoorSide = 'left' | 'right';
 export type ComputerState = 'OFF' | 'ON' | 'WORKING' | 'CAMERA_VIEW' | 'REBOOTING';
 export type AnimatronicName = 'crocodile' | 'dog' | 'fox' | 'chick' | 'freddy';
 export type AnimatronicMode = 'hidden' | 'waiting' | 'moving' | 'door' | 'window' | 'running' | 'office' | 'retreating';
+export type WatcherPosition = 'start' | 'middle' | 'end';
 
 export interface AnimatronicState {
   name: AnimatronicName;
@@ -33,6 +34,16 @@ export interface ProblemState {
   rageActive: boolean;
 }
 
+export interface WatcherState {
+  active: boolean;
+  position: WatcherPosition;
+  moveTimer: number;
+  turnTimer: number;
+  attackTimer: number;
+  maskTime: number;
+  headTurned: boolean;
+}
+
 export interface AnimatronicRule {
   enabled: boolean;
   spawnTime: number;
@@ -47,6 +58,7 @@ export interface ProblemRule {
 export interface GameRules {
   officeBrightness: number;
   animatronics: Record<AnimatronicName, AnimatronicRule>;
+  watcher: AnimatronicRule;
   problems: Record<'outage' | 'static' | 'rage', ProblemRule>;
 }
 
@@ -56,6 +68,8 @@ export interface GameState {
   energy: number;
   flashlightBattery: number;
   hasFlashlight: boolean;
+  hasMask: boolean;
+  maskOn: boolean;
   flashlightOn: boolean;
   flashlightAtWindow: boolean;
   flashlightPulse: number;
@@ -74,6 +88,7 @@ export interface GameState {
   rules: GameRules;
   problems: ProblemState;
   animatronics: Record<AnimatronicName, AnimatronicState>;
+  watcher: WatcherState;
   message: string;
   messageTime: number;
   gameOver: string | null;
