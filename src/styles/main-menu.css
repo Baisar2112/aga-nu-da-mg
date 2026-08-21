@@ -55,10 +55,18 @@
 @keyframes prompt-blink { 0%, 72% { color: #fff; } 73%, 100% { color: #777; } }
 
 @media (max-width: 800px) {
-  .main-menu { grid-template-columns: 42% 58%; min-height: 520px; }
-  .main-menu__panel { padding: 24px 18px; border-right-width: 8px; }
-  .main-menu h1 { top: 24px; left: 18px; }
+  .main-menu { grid-template-columns: 42% 58%; height: 100svh; min-height: 0; }
+  .main-menu__panel { padding: 16px 12px; border-right-width: 6px; }
+  .main-menu h1 { top: 16px; left: 12px; font-size: clamp(12px, 3vw, 24px); text-shadow: 3px 3px #3c3c3c; }
+  .main-menu__prompt { bottom: 10%; padding: 14px 4px; font-size: clamp(12px, 3vw, 24px); }
   .main-menu__art img { object-position: 48% center; }
-  .menu-buttons button { min-height: 76px; padding: 10px 5px; }
-  .confirm-dialog { inset: 15% 4%; padding: 16px; border-width: 4px; }
+  .menu-buttons { gap: clamp(8px, 2vh, 16px); margin-bottom: 3vh; }
+  .menu-buttons button { min-height: clamp(44px, 12vh, 64px); padding: 8px 4px; font-size: clamp(8px, 1.8vw, 14px); text-shadow: 2px 2px #101010; }
+  .menu-buttons button.is-selected { outline-width: 3px; }
+  .menu-buttons__empty { margin-top: -4px; font-size: clamp(6px, 1.3vw, 10px); }
+  .confirm-dialog { inset: 12% 4%; padding: 10px 6px; border-width: 3px; box-shadow: 6px 6px 0 #000; }
+  .confirm-dialog h2 { font-size: clamp(10px, 2.4vw, 18px); line-height: 1.4; }
+  .confirm-dialog p { margin: 12px 0 18px; font-size: clamp(7px, 1.5vw, 11px); }
+  .confirm-dialog div { gap: 6px; }
+  .confirm-dialog button { flex: 1; min-width: 0; padding: 8px 2px; font-size: clamp(10px, 2vw, 16px); }
 }
