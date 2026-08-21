@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { MenuButtons } from '../components/menu/MenuButtons';
 import { DeveloperConsole } from '../components/menu/DeveloperConsole';
@@ -18,6 +18,14 @@ export function HomePage() {
   const saveStatus = getSaveStatus();
   const secondLabel = saveStatus === 'completed' ? 'RETRY?' : 'CONTINUE';
   const secondEnabled = saveStatus !== 'empty';
+
+  const openMenu = useCallback(() => {
+    if (stage !== 'title') return;
+    playThunder();
+    setStage('reveal');
+    window.setTimeout(() => setStage('flash'), 100);
+    window.setTimeout(() => setStage('menu'), 400);
+  }, [stage]);
 
   const startNewGame = () => {
     clearGameSave();
@@ -42,10 +50,7 @@ export function HomePage() {
       if (stage === 'title') {
         if (event.code !== 'Space') return;
         event.preventDefault();
-        playThunder();
-        setStage('reveal');
-        window.setTimeout(() => setStage('flash'), 100);
-        window.setTimeout(() => setStage('menu'), 400);
+        openMenu();
         return;
       }
       if (stage === 'confirm') return;
@@ -59,14 +64,15 @@ export function HomePage() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [developerOpen, secondEnabled, selected, stage]);
+  }, [developerOpen, openMenu, secondEnabled, selected, stage]);
 
   return <main className={`main-menu${stage === 'reveal' ? ' main-menu--reveal' : ''}${stage === 'flash' ? ' main-menu--flash' : ''}`}>
     <section className="main-menu__panel">
       <div className="main-menu__noise" aria-hidden="true" />
       <h1>LAST NIGHT<br />AT...<br /><span>FREDDY?</span></h1>
       {stage === 'title' || stage === 'reveal' || stage === 'flash' ?
-        <p className="main-menu__prompt">PRESS SPACE</p>
+        <button className="main-menu__prompt" type="button" onClick={openMenu}
+          disabled={stage !== 'title'}>PRESS SPACE</button>
         : <MenuButtons selected={selected} secondLabel={secondLabel}
         secondEnabled={secondEnabled} onHover={setSelected} onChoose={choose} />}
       {stage === 'confirm' && <NewGameConfirm onConfirm={startNewGame} onCancel={() => setStage('menu')} />}
