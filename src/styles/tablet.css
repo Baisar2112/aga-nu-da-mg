@@ -64,7 +64,8 @@
 @keyframes watcher-tracker-pulse { 50% { opacity: .12; } }
 
 @media (max-width: 820px) {
-  .tablet-ui { width: 98vw; border-width: 10px; }
+  .tablet-overlay { padding: 4vh 3vw 2vh; }
+  .tablet-ui { width: 92vw; height: 84dvh; border-width: 10px; }
   .tablet-layout { grid-template-columns: minmax(0, 1fr) 135px; }
   .camera-floorplan { inset: 4% 3%; width: auto; height: auto; }
   .floor-room span { bottom: 3px; left: 3px; font-size: 7px; }
@@ -78,7 +79,7 @@
 
 @media (max-height: 600px) {
   .tablet-overlay { padding-top: 8px; }
-  .tablet-ui { height: 96%; border-width: 8px; }
+  .tablet-ui { width: 94%; height: 90%; border-width: 8px; }
   .tablet-ui > header { height: 40px; padding: 0 10px; }
   .tablet-layout { height: calc(100% - 40px); }
   .tablet-actions { grid-template-rows: 95px 125px; gap: 14px; padding: 14px 10px; }

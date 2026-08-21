@@ -10,8 +10,12 @@ interface Props {
 
 export function TouchControls(props: Props) {
   return <nav className="touch-controls" aria-label="Сенсорное управление" data-touch-ignore>
-    <UiAnchor anchor="top-center" offsetY={14} className="touch-controls__pause">
-      <button className="touch-pause-button" type="button" onClick={props.onPause} aria-label="Пауза">Ⅱ</button>
+    <UiAnchor anchor="top-left" offsetX={10} offsetY={10} className="touch-controls__pause">
+      <button className="touch-pause-button" type="button" onClick={props.onPause} aria-label="Пауза">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+        </svg>
+      </button>
     </UiAnchor>
     <UiAnchor anchor="bottom-center" offsetY={10} className="touch-action-control">
       <button className="touch-action-button touch-action-button--mask" type="button"
