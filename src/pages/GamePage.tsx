@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { ComputerScreen } from '../components/game/ComputerScreen';
 import { EndScreen } from '../components/game/EndScreen';
+import { FullscreenButton } from '../components/game/FullscreenButton';
 import { GameHud } from '../components/game/GameHud';
 import { Jumpscare, jumpscareImages } from '../components/game/Jumpscare';
 import { MaskOverlay } from '../components/game/MaskOverlay';
@@ -114,6 +115,7 @@ export function GamePage() {
       })} />;
 
   return <VirtualViewport className={`game-shell${isPaused ? ' game-shell--paused' : ''}`} world={office}>
+    <FullscreenButton />
     <GameHud state={state} />
     <div className="controls-hint"><span><kbd>A</kbd> ЛЕВАЯ ДВЕРЬ</span><span><kbd>S</kbd> {state.hasMask ? 'МАСКА' : 'НЕТ МАСКИ'}</span><span><kbd>SPACE</kbd> ПЛАНШЕТ</span><span><kbd>D</kbd> ПРАВАЯ ДВЕРЬ</span><span><kbd>ПКМ</kbd> {state.hasFlashlight ? 'ФОНАРИК' : 'НЕТ ФОНАРИКА'}</span></div>
     {state.maskOn && <MaskOverlay />}
